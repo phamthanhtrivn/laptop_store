@@ -14,13 +14,9 @@ const productSchema = new mongoose.Schema({
     storage: String,
     gpu: String,
     screen: String
-  },
-  ratings: {
-    average: Number,
-    reviews: Number
   }
 })
 
-const Product =  mongoose.model('Product', productSchema)
+const Product = mongoose.model.product ||  mongoose.model('product', productSchema)
 
 export default Product;
