@@ -14,7 +14,8 @@ const productSchema = new mongoose.Schema({
     storage: String,
     gpu: String,
     screen: String
-  }
+  },
+  date: Number
 })
 
 const Product = mongoose.model.product ||  mongoose.model('product', productSchema)
