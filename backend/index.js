@@ -5,6 +5,7 @@ import productRoute from "./routes/productRoutes.js";
 import connectDB from "./config/connectDB.js";
 import userRoute from "./routes/userRoutes.js";
 import connectCloudinary from "./config/cloudinary.js";
+import cartRoute from "./routes/cartRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -16,6 +17,7 @@ app.use(express.json());
 
 app.use("/api/products", productRoute);
 app.use("/api/user", userRoute);
+app.use("/api/cart", cartRoute);
 
 app.get("/", (req, res) => {
   res.send("Welcome to Laptop Store!");

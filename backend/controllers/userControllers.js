@@ -81,14 +81,22 @@ export const login = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { userID, ...data } = req.body
-    const updatedUser = await User.findByIdAndUpdate(userID, { $set: data }, {new: true})
+    const { userID, ...data } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      userID,
+      { $set: data },
+      { new: true }
+    );
 
     if (!updatedUser) {
       return res.json({ success: false, message: "Người dùng không tồn tại!" });
     }
 
-    res.json({ success: true, message: "Cập nhật thông tin thành công!", user: updatedUser });
+    res.json({
+      success: true,
+      message: "Cập nhật thông tin thành công!",
+      user: updatedUser,
+    });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -97,14 +105,14 @@ export const updateUser = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const { userID } = req.body
+    const { userID } = req.body;
 
-    const user = await User.findById(userID)
+    const user = await User.findById(userID);
     if (!user) {
       return res.json({ success: false, message: "Người dùng không tồn tại!" });
     }
 
-    res.json({success: true, user})
+    res.json({ success: true, user });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -124,5 +132,51 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
+  }
+};
+
+export const getUserList = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    const users = await User.find({}).skip(skip).limit(limit);
+    const totalUsers = await User.countDocuments();
+
+    res.json({
+      success: true,
+      users,
+      pagination: {
+        totalUsers,
+        totalPages: Math.ceil(totalUsers / limit),
+        currentPage: page,
+        limitPerPage: limit,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      const token = jwt.sign(email + password, process.env.JWT_SECRET);
+      res.json({ success: true, token });
+    } else {
+      res.json({
+        success: false,
+        message: "Tài khoản và mật khẩu không hợp lệ!",
+      });
+    }
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+    console.log(error);
   }
 };

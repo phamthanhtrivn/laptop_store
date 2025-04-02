@@ -1,12 +1,15 @@
 import express from 'express'
-import { getUser, login, register, updateUser } from '../controllers/userControllers.js'
+import { adminLogin, getUser, getUserList, login, register, updateUser } from '../controllers/userControllers.js'
 import authUser from '../middlewares/authUser.js'
+import authAdmin from '../middlewares/authAdmin.js'
 
 const userRoute = express.Router()
 
 userRoute.post('/login', login)
 userRoute.post('/register', register)
-userRoute.post('/get', authUser, getUser)
+userRoute.get('/get', authUser, getUser)
 userRoute.post('/update', authUser, updateUser)
+userRoute.get('/list', authAdmin, getUserList)
+userRoute.post('/admin', adminLogin)
 
 export default userRoute

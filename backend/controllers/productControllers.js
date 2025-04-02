@@ -3,8 +3,22 @@ import { v2 as cloudinary } from "cloudinary";
 
 export const productList = async (req, res) => {
   try {
-    const products = await Product.find({});
-    res.json({ success: true, products });
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    const products = await Product.find({}).skip(skip).limit(limit);
+    const totalProducts = await Product.countDocuments();
+
+    res.json({ 
+      success: true,
+      products,
+      pagination: {
+        totalProducts,
+        totalPages: Math.ceil(totalProducts / limit),
+        currentPage: page,
+        limitPerPage: limit,
+      }, });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -18,7 +32,10 @@ export const updateProduct = async (req, res) => {
 
     const product = await Product.findById(productID);
     if (!product) {
-      return res.json({ success: false, message: "Sản phẩm không tồn tại để cập nhật!" });
+      return res.json({
+        success: false,
+        message: "Sản phẩm không tồn tại để cập nhật!",
+      });
     }
 
     // Lấy danh sách ảnh cũ
@@ -67,16 +84,17 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-
-
 export const deleteProduct = async (req, res) => {
   try {
     const productID = req.params.id;
 
-    const productDelete = await Product.findByIdAndDelete(productID)
+    const productDelete = await Product.findByIdAndDelete(productID);
 
     if (!productDelete) {
-      return res.json({success: false, message: 'Sản phẩm không tồn tại để xóa!'})
+      return res.json({
+        success: false,
+        message: "Sản phẩm không tồn tại để xóa!",
+      });
     }
 
     res.json({
@@ -99,17 +117,17 @@ export const addProduct = async (req, res) => {
       stock,
       description,
       category,
-      cpu,  
+      cpu,
       ram,
       storage,
       gpu,
       screen,
     } = req.body;
 
-    const image1 = req.files.image1 && req.files.image1[0];
-    const image2 = req.files.image2 && req.files.image2[0];
-    const image3 = req.files.image3 && req.files.image3[0];
-    const image4 = req.files.image4 && req.files.image4[0];
+    const image1 = req?.files?.image1 && req?.files?.image1[0];
+    const image2 = req?.files?.image2 && req?.files?.image2[0];
+    const image3 = req?.files?.image3 && req?.files?.image3[0];
+    const image4 = req?.files?.image4 && req?.files?.image4[0];
 
     const images = [image1, image2, image3, image4].filter(
       (item) => item != undefined
@@ -136,15 +154,15 @@ export const addProduct = async (req, res) => {
         gpu,
         ram,
         storage,
-        screen
+        screen,
       },
       images: imageUrl,
       date: Date.now(),
     };
 
-    const product = new Product(productData)
+    const product = new Product(productData);
 
-    await product.save()
+    await product.save();
 
     res.json({ success: true, message: "Thêm sản phẩm mới thành công!" });
   } catch (error) {
@@ -155,17 +173,16 @@ export const addProduct = async (req, res) => {
 
 export const getProduct = async (req, res) => {
   try {
-    const productID = req.params.id
-    const product = await Product.findById(productID)
+    const productID = req.params.id;
+    const product = await Product.findById(productID);
 
     if (!product) {
-      return res.json({ success: false, message: 'Sản phẩm không tồn tại!'})
+      return res.json({ success: false, message: "Sản phẩm không tồn tại!" });
     }
 
-    res.json({ success: true, product})
-
+    res.json({ success: true, product });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
   }
-}
+};
