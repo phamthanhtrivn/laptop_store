@@ -8,11 +8,10 @@ export const useToken = () => useContext(TokenContext)
 
 const TokenContextProvider = ({children}) => {
 
-  const [token, setToken] = useState(localStorage.getItem('token') ? localStorage.getItem('token') : '')
+  const [token, setToken] = useState(sessionStorage.getItem('token') ? sessionStorage.getItem('token') : '')
   
   useEffect(() => {
-    localStorage.clear();
-    localStorage.setItem('token', token)
+    sessionStorage.setItem('token', token)
   }, [token])
 
   const value = {

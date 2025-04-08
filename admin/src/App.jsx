@@ -8,11 +8,13 @@ import Users from "./pages/Users";
 import Header from "./components/Header";
 import { useToken } from "./context/TokenContextProvider";
 import Login from "./components/Login";
+import { ToastContainer } from "react-toastify";
 
 const App = () => {
   const { token } = useToken();
   return (
     <>
+      <ToastContainer />
       {token ? (
         <>
           <div className="flex">
