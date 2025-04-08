@@ -7,8 +7,8 @@ const userRoute = express.Router()
 
 userRoute.post('/login', login)
 userRoute.post('/register', register)
-userRoute.get('/get', authUser, getUser)
-userRoute.post('/update', authUser, updateUser)
+userRoute.get('/get/:id', getUser)
+userRoute.post('/update/:id', updateUser)
 userRoute.get('/list', authAdmin, getUserList)
 userRoute.post('/admin', adminLogin)
 

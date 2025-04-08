@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
   cartData: {
     type: Array, default: []
   },
+  date: Number,
   address: { type: Object, default: {}}
 }, {minimize: false})
 

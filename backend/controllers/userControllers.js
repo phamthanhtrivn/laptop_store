@@ -43,6 +43,7 @@ export const register = async (req, res) => {
         street: "",
       },
       cartData: [],
+      date: Date.now()
     });
 
     const user = await newUser.save();
@@ -81,7 +82,8 @@ export const login = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { userID, ...data } = req.body;
+    const userID = req.params.id 
+    const { ...data } = req.body;
     const updatedUser = await User.findByIdAndUpdate(
       userID,
       { $set: data },
@@ -105,7 +107,7 @@ export const updateUser = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const { userID } = req.body;
+    const userID = req.params.id;
 
     const user = await User.findById(userID);
     if (!user) {
