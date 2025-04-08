@@ -33,9 +33,9 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
       setPhone(response.data.user.phone);
       setEmail(response.data.user.email);
       setSelectedCity(response.data.user.address.city)
-      setSelectedCity(response.data.user.address.district)
-      setSelectedCity(response.data.user.address.ward)
-      setSelectedCity(response.data.user.address.street)
+      setSelectedDistrict(response.data.user.address.district)
+      setSelectedWard(response.data.user.address.ward)
+      setStreet(response.data.user.address.street)
     } else {
       toast.error(response.data.message);
     }
@@ -156,7 +156,7 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
                 value={selectedCity?.name || ""}
                 onChange={(e) =>
                   setSelectedCity(
-                    cities.find((c) => c.name === Number(e.target.value))
+                    cities.find((c) => c.name === e.target.value)
                   )
                 }
                 className="border border-gray-300 rounded-md px-3 py-2"
@@ -175,7 +175,7 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
                 value={selectedDistrict?.name || ""}
                 onChange={(e) =>
                   setSelectedDistrict(
-                    districts.find((d) => d.name === Number(e.target.value))
+                    districts.find((d) => d.name === e.target.value)
                   )
                 }
                 className="border border-gray-300 rounded-md px-3 py-2"
@@ -196,7 +196,7 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
                 value={selectedWard?.name || ""}
                 onChange={(e) =>
                   setSelectedWard(
-                    wards.find((w) => w.name === Number(e.target.value))
+                    wards.find((w) => w.name === e.target.value)
                   )
                 }
                 className="border border-gray-300 rounded-md px-3 py-2"

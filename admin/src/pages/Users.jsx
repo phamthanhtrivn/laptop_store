@@ -3,9 +3,10 @@
   import axios from "axios";
   import { useToken } from "../context/TokenContextProvider";
   import { toast } from "react-toastify";
-  import { BookmarkPlus, ChevronLeft, ChevronRight, Download, Edit, Trash2 } from "lucide-react";
+  import { BookmarkPlus, ChevronLeft, ChevronRight, Edit, RefreshCcw, Search, Trash2 } from "lucide-react";
 import AddUserModal from "../components/AddUserModal";
 import EditUserModal from "../components/EditUserModal";
+import Swal from 'sweetalert2/dist/sweetalert2.js'
 
   const Users = () => {
     const searchRef = useRef(null);
@@ -16,6 +17,43 @@ import EditUserModal from "../components/EditUserModal";
     const [showAddModal, setShowAddModal] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
     const [userID, setUserID] = useState(null)
+
+    const handleRefresh = async () => {
+      fetchUserData()
+      searchRef.current.value = ""
+    }
+
+    const handleSearch = async () => {
+      const email = searchRef.current.value
+      const response = await axios.get(backendUrl + `/api/user/email-user?email=${email}`)
+      if (response.data.success) {
+        setUsers([response.data.user])
+      }
+      else {
+        toast.error(response.data.message)
+      }
+    }
+
+    const handleDeleteUser = async (id) => {
+      Swal.fire({
+        title: "Bạn có muốn xóa người dùng này không?",
+        showDenyButton: true,
+        confirmButtonText: "Xóa",
+        denyButtonText: `Hủy`
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const response = await axios.delete(backendUrl + `/api/user/delete/${id}`, {headers: {token}})
+          if (response.data.success) {
+            Swal.fire("Xóa người dùng thành công!", "", "success");
+            fetchUserData()
+          }
+          else {
+            Swal.fire("Không thể xóa người dùng này!");
+          }
+          
+        } 
+      });
+    }
     
 
     const handleOpenEditModal = (id) => {
@@ -51,23 +89,27 @@ import EditUserModal from "../components/EditUserModal";
       <div className="p-5">
         <h1 className="text-2xl font-semibold mb-5">Quản Lý Người Dùng</h1>
         <div className="flex justify-between">
-          <div className="flex gap-5 w-1/3 text-gray-700">
-            <p>Nhập tên cần tìm: </p>
+          <div className="flex gap-5 text-gray-700 items-center">
+            <p>Nhập email cần tìm: </p>
             <input
               type="text"
-              placeholder="Tìm kiếm theo tên..."
+              placeholder="ex: phamthanhtri@gmail.com"
               ref={searchRef}
               className="border border-gray-300 rounded-md px-3 py-2 w-full outline-none"
             />
+            <button onClick={() => handleSearch()} className="items-center w-[250px] hover:text-red-500 hover:bg-white duration-300 transition-all cursor-pointer bg-red-500 border border-red-500 text-white flex px-4 py-2 rounded-md gap-5 font-medium">
+              <Search />
+              <p>Tìm kiếm</p>
+            </button>
           </div>
           <div className="flex gap-5 items-center">
             <button onClick={() => setShowAddModal(true)} className="hover:text-red-500 hover:bg-white duration-300 transition-all cursor-pointer bg-red-500 border border-red-500 text-white flex px-4 py-2 rounded-md gap-5 font-medium">
               <BookmarkPlus />
               <p>Thêm</p>
             </button>
-            <button className="hover:bg-red-500 hover:text-white duration-300 transition-all cursor-pointer bg-white border border-red-500 text-red-500 flex px-4 py-2 rounded-md gap-5 font-medium">
-              <Download />
-              <p>Xuất file</p>
+            <button onClick={() => handleRefresh()} className="hover:bg-red-500 hover:text-white duration-300 transition-all cursor-pointer bg-white border border-red-500 text-red-500 flex px-4 py-2 rounded-md gap-5 font-medium">
+              <RefreshCcw />
+              <p>Tải lại</p>
             </button>
           </div>
         </div>
@@ -109,7 +151,7 @@ import EditUserModal from "../components/EditUserModal";
                       <button onClick={() => handleOpenEditModal(user._id)} className="text-yellow-500 hover:text-yellow-600 transition cursor-pointer">
                         <Edit className="w-5 h-5" />
                       </button>
-                      <button className="text-red-500 hover:text-red-600 transition cursor-pointer">
+                      <button onClick={() => handleDeleteUser(user._id)} className="text-red-500 hover:text-red-600 transition cursor-pointer">
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
@@ -119,7 +161,10 @@ import EditUserModal from "../components/EditUserModal";
             </tbody>
           </table>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-between">
+          <div className="text-sm mt-6" >
+            Tổng số người dùng: {pagination.totalUsers}
+          </div>
           <div className="flex justify-center items-center gap-5 mt-6">
             <button
               disabled={page === 1}

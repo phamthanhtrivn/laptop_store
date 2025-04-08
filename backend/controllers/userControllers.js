@@ -121,6 +121,38 @@ export const getUser = async (req, res) => {
   }
 };
 
+export const getUserByEmail = async (req, res) => {
+  try {
+    const email = req.query.email;
+
+    const user = await User.findOne({email});
+    if (!user) {
+      return res.json({ success: false, message: "Người dùng không tồn tại!" });
+    }
+
+    res.json({ success: true, user });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const userID = req.params.id;
+
+    const user = await User.findByIdAndDelete(userID);
+    if (!user) {
+      return res.json({ success: false, message: "Người dùng không tồn tại!" });
+    }
+
+    res.json({ success: true, message: 'Xóa người dùng thành công!' });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 export const forgotPassword = async (req, res) => {
   try {
   } catch (error) {
