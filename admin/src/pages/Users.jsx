@@ -70,7 +70,7 @@ import Swal from 'sweetalert2/dist/sweetalert2.js'
           }
         );
         if (response.data.success) {
-          setUsers(response.data.users);
+          setUsers(response.data.users.reverse());
           setPagination(response.data.pagination);
         } else {
           toast.error("Không thể lấy dữ liệu người dùng!");
@@ -188,10 +188,10 @@ import Swal from 'sweetalert2/dist/sweetalert2.js'
           </div>
         </div>
         {showAddModal && (
-          <AddUserModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
+          <AddUserModal fetchUserData={fetchUserData} isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
         )}
         {showEditModal && (
-          <EditUserModal id={userID} isOpen={showEditModal} onClose={() => setShowEditModal(false)} />
+          <EditUserModal fetchUserData={fetchUserData} id={userID} isOpen={showEditModal} onClose={() => setShowEditModal(false)} />
         )}
       </div>
     );

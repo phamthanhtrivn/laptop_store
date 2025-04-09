@@ -5,7 +5,7 @@ const SideBarMenu = () => {
   const navigate = useNavigate()
   
   return (
-    <div className="p-5 border-r-1 border-gray-300 pb-110">
+    <div className="p-5 border-r-1 border-gray-300 pb-210">
       <div className="w-30" onClick={() => navigate('/')}>
         <img className="w-full" src={images.logo_admin} alt="logo_admin" />
       </div>

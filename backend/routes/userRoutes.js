@@ -1,5 +1,5 @@
 import express from 'express'
-import { adminLogin, deleteUser, getUser, getUserByEmail, getUserList, login, register, updateUser } from '../controllers/userControllers.js'
+import { addUser, adminLogin, checkUserPassword, deleteUser, getUser, getUserByEmail, getUserList, login, register, updateUser } from '../controllers/userControllers.js'
 import authUser from '../middlewares/authUser.js'
 import authAdmin from '../middlewares/authAdmin.js'
 
@@ -13,5 +13,7 @@ userRoute.delete('/delete/:id', authAdmin, deleteUser)
 userRoute.post('/update/:id', updateUser)
 userRoute.get('/list', authAdmin, getUserList)
 userRoute.post('/admin', adminLogin)
+userRoute.post('/add', authAdmin, addUser)
+userRoute.post('/check-password/:id', checkUserPassword)
 
 export default userRoute

@@ -43,13 +43,56 @@ export const register = async (req, res) => {
         street: "",
       },
       cartData: [],
-      date: Date.now()
+      date: Date.now(),
     });
 
     const user = await newUser.save();
 
     const token = createToken(user._id);
     res.json({ success: true, token });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const addUser = async (req, res) => {
+  try {
+    const { name, email, password, phone, address } = req.body;
+
+    const exist = await User.findOne({ email });
+    if (exist) {
+      return res.json({
+        success: false,
+        message: "Tồn tại người dùng sử dụng email này!",
+      });
+    }
+
+    const exist2 = await User.findOne({ phone });
+    if (exist2) {
+      return res.json({
+        success: false,
+        message: "Tồn tại người dùng sử dụng số điện thoại này!",
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new User({
+      name,
+      password: hashedPassword,
+      email,
+      phone,
+      address,
+      cartData: [],
+      date: Date.now(),
+    });
+
+    await newUser.save();
+
+    res.json({ success: true, message: "Thêm người dùng thành công!" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -80,9 +123,37 @@ export const login = async (req, res) => {
   }
 };
 
+export const checkUserPassword = async (req, res) => {
+  try {
+    const userID = req.params.id;
+    const { password } = req.body;
+
+    const user = await User.findById(userID);
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "Không tồn tại người dùng này!",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.json({ success: false, message: "Mật khẩu không khớp!" });
+    }
+
+    res.json({
+      success: true,
+      message: "Mật khẩu khớp!",
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 export const updateUser = async (req, res) => {
   try {
-    const userID = req.params.id 
+    const userID = req.params.id;
     const { ...data } = req.body;
     const updatedUser = await User.findByIdAndUpdate(
       userID,
@@ -125,7 +196,7 @@ export const getUserByEmail = async (req, res) => {
   try {
     const email = req.query.email;
 
-    const user = await User.findOne({email});
+    const user = await User.findOne({ email });
     if (!user) {
       return res.json({ success: false, message: "Người dùng không tồn tại!" });
     }
@@ -146,7 +217,7 @@ export const deleteUser = async (req, res) => {
       return res.json({ success: false, message: "Người dùng không tồn tại!" });
     }
 
-    res.json({ success: true, message: 'Xóa người dùng thành công!' });
+    res.json({ success: true, message: "Xóa người dùng thành công!" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });

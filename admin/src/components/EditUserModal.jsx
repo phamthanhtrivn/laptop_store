@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -5,7 +6,7 @@ import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useToken } from "../context/TokenContextProvider";
 
-const EditUserModal = ({ id, isOpen, onClose }) => {
+const EditUserModal = ({ fetchUserData, id, isOpen, onClose }) => {
   const { backendUrl } = useToken();
 
   const [cities, setCities] = useState([]);
@@ -17,33 +18,13 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
 
-  const [selectedCity, setSelectedCity] = useState(null);
-  const [selectedDistrict, setSelectedDistrict] = useState(null);
-  const [selectedWard, setSelectedWard] = useState(null);
+  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedWard, setSelectedWard] = useState("");
   const [street, setStreet] = useState("");
   const [password, setPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-
-  const fetchUser = async () => {
-    const response = await axios.get(backendUrl + `/api/user/get/${id}`);
-    if (response.data.success) {
-      setUser(response.data.user);
-      setName(response.data.user.name);
-      setPhone(response.data.user.phone);
-      setEmail(response.data.user.email);
-      setSelectedCity(response.data.user.address.city)
-      setSelectedDistrict(response.data.user.address.district)
-      setSelectedWard(response.data.user.address.ward)
-      setStreet(response.data.user.address.street)
-    } else {
-      toast.error(response.data.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
 
   useEffect(() => {
     axios
@@ -53,40 +34,155 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
   }, []);
 
   useEffect(() => {
-    if (selectedCity) {
+    const selectedCityObj = cities.find((c) => c.name === selectedCity);
+    if (selectedCityObj) {
       axios
-        .get(`https://provinces.open-api.vn/api/p/${selectedCity.code}?depth=2`)
+        .get(
+          `https://provinces.open-api.vn/api/p/${selectedCityObj.code}?depth=2`
+        )
         .then((res) => setDistricts(res.data.districts))
         .catch((err) => console.error("Lỗi lấy quận/huyện:", err));
     } else {
       setDistricts([]);
     }
-    setSelectedDistrict(null);
+    setSelectedDistrict("");
     setWards([]);
   }, [selectedCity]);
 
   useEffect(() => {
-    if (selectedDistrict) {
+    const selectedDistrictObj = districts.find(
+      (d) => d.name === selectedDistrict
+    );
+    if (selectedDistrictObj) {
       axios
         .get(
-          `https://provinces.open-api.vn/api/d/${selectedDistrict.code}?depth=2`
+          `https://provinces.open-api.vn/api/d/${selectedDistrictObj.code}?depth=2`
         )
         .then((res) => setWards(res.data.wards))
         .catch((err) => console.error("Lỗi lấy phường/xã:", err));
     } else {
       setWards([]);
     }
-    setSelectedWard(null);
+    setSelectedWard("");
   }, [selectedDistrict]);
-
-  const handleAddUser = async () => {
-    toast.success("Đã thêm người dùng!");
-    onClose();
-  };
 
   const handleOverlayClick = (e) => {
     if (e.target.id === "modalOverlay") {
       onClose();
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      setUser(null);
+      setName("");
+      setPhone("");
+      setEmail("");
+      setStreet("");
+      setSelectedCity("");
+      setSelectedDistrict("");
+      setSelectedWard("");
+      setPassword("");
+    }
+  }, [isOpen]);
+
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(backendUrl + `/api/user/get/${id}`);
+      if (!response.data.success) {
+        toast.error(response.data.message);
+        return;
+      }
+
+      const u = response.data.user;
+      setUser(u);
+      setName(u.name);
+      setPhone(u.phone);
+      setEmail(u.email);
+      setStreet(u.address.street);
+
+      setSelectedCity(u.address.city);
+      const cityObj = cities.find((c) => c.name === u.address.city);
+      if (cityObj) {
+        const districtRes = await axios.get(
+          `https://provinces.open-api.vn/api/p/${cityObj.code}?depth=2`
+        );
+        setDistricts(districtRes.data.districts);
+
+        setSelectedDistrict(u.address.district);
+        const districtObj = districtRes.data.districts.find(
+          (d) => d.name === u.address.district
+        );
+        if (districtObj) {
+          const wardRes = await axios.get(
+            `https://provinces.open-api.vn/api/d/${districtObj.code}?depth=2`
+          );
+          setWards(wardRes.data.wards);
+
+          setSelectedWard(u.address.ward);
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi khi load user:", err);
+      toast.error("Đã có lỗi khi tải thông tin người dùng.");
+    }
+  };
+
+  useEffect(() => {
+    if (cities.length > 0 && id) {
+      fetchUser();
+    }
+  }, [cities, id]);
+
+  const handleUpdateUser = async () => {
+    const response = await axios.post(
+      backendUrl + `/api/user/check-password/${id}`,
+      { password }
+    );
+
+    if (
+      !name.match(/^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯàáâãèéêìíòóôõùúăđĩũơưẠ-ỹ\s]+$/)
+    ) {
+      toast.error("Tên không hợp lệ!");
+      return;
+    }
+
+    if (!phone.match(/^(0)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/)) {
+      toast.error("Số điện thoại không hợp lệ!");
+      return;
+    }
+
+    if (email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/)) {
+      toast.error("Email không hợp lệ!");
+      return;
+    }
+
+    if (response.data.success) {
+      const updateUser = {
+        name,
+        phone,
+        email,
+        address: {
+          city: selectedCity,
+          district: selectedDistrict,
+          ward: selectedWard,
+          street,
+        },
+      };
+
+      const response2 = await axios.post(
+        backendUrl + `/api/user/update/${id}`,
+        updateUser
+      );
+      if (response2.data.success) {
+        toast.success(response2.data.message);
+        fetchUserData();
+        onClose();
+      } else {
+        toast.error(response2.data.message);
+      }
+    } else {
+      toast.error(response.data.message);
     }
   };
 
@@ -100,7 +196,9 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
     >
       <div className="bg-white border border-gray-300 rounded-xl p-6 w-full max-w-5xl shadow-xl">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-6">Cập nhật thông tin người dùng</h2>
+          <h2 className="text-2xl font-semibold mb-6">
+            Cập nhật thông tin người dùng
+          </h2>
         </div>
 
         <div className="flex gap-10 justify-between">
@@ -114,6 +212,7 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
             <div className="flex flex-col gap-3 mt-3">
               <label className="font-medium">Họ và tên: </label>
               <input
+                required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 type="text"
@@ -124,6 +223,7 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
             <div className="flex flex-col gap-3 mt-3">
               <label className="font-medium">Email: </label>
               <input
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
@@ -134,6 +234,7 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
             <div className="flex flex-col gap-3 mt-3">
               <label className="font-medium">Số điện thoại: </label>
               <input
+                required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 type="number"
@@ -141,7 +242,6 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
                 className="border border-gray-300 px-3 py-2 w-full mb-4 rounded"
               />
             </div>
-
           </div>
           <div className="border border-gray-300 p-5 rounded w-1/2">
             <div>
@@ -153,12 +253,8 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
             <div className="flex flex-col gap-3 mt-3">
               <label className="font-medium">Tỉnh / Thành phố:</label>
               <select
-                value={selectedCity?.name || ""}
-                onChange={(e) =>
-                  setSelectedCity(
-                    cities.find((c) => c.name === e.target.value)
-                  )
-                }
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
                 className="border border-gray-300 rounded-md px-3 py-2"
               >
                 <option value="">--Chọn tỉnh/thành phố--</option>
@@ -172,12 +268,8 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
             <div className="flex flex-col gap-3 mt-3">
               <label className="font-medium">Quận / Huyện:</label>
               <select
-                value={selectedDistrict?.name || ""}
-                onChange={(e) =>
-                  setSelectedDistrict(
-                    districts.find((d) => d.name === e.target.value)
-                  )
-                }
+                value={selectedDistrict}
+                onChange={(e) => setSelectedDistrict(e.target.value)}
                 className="border border-gray-300 rounded-md px-3 py-2"
                 disabled={!selectedCity}
               >
@@ -193,12 +285,8 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
             <div className="flex flex-col gap-3 mt-3">
               <label className="font-medium">Phường / Xã:</label>
               <select
-                value={selectedWard?.name || ""}
-                onChange={(e) =>
-                  setSelectedWard(
-                    wards.find((w) => w.name === e.target.value)
-                  )
-                }
+                value={selectedWard}
+                onChange={(e) => setSelectedWard(e.target.value)}
                 className="border border-gray-300 rounded-md px-3 py-2"
                 disabled={!selectedDistrict}
               >
@@ -213,6 +301,7 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
             <div className="flex flex-col gap-3 mt-3">
               <label className="font-medium">Địa chỉ:</label>
               <input
+                required
                 placeholder="12 Nguyễn Văn Bảo"
                 className="border border-gray-300 rounded-md px-3 py-2"
                 type="text"
@@ -225,9 +314,12 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
 
         <div className="p-5 border border-gray-300 rounded mt-8">
           <div className="flex flex-col gap-3">
-            <label className="font-medium">Xác nhận mật khẩu để lưu thay đổi:</label>
+            <label className="font-medium">
+              Xác nhận mật khẩu để lưu thay đổi:
+            </label>
             <div className="flex items-center justify-between gap-3 border border-gray-300 rounded-md px-3 mb-4 py-2">
               <input
+                required
                 placeholder="..."
                 className="border-none outline-none w-full"
                 type={showPassword ? "text" : "password"}
@@ -253,7 +345,7 @@ const EditUserModal = ({ id, isOpen, onClose }) => {
             Đóng
           </button>
           <button
-            onClick={handleAddUser}
+            onClick={handleUpdateUser}
             className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"
           >
             Lưu
