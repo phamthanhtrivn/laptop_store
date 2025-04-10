@@ -7,7 +7,7 @@ export const productList = async (req, res) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    const products = await Product.find({}).skip(skip).limit(limit);
+    const products = await Product.find({}).sort({ date: -1}).skip(skip).limit(limit);
     const totalProducts = await Product.countDocuments();
 
     res.json({ 

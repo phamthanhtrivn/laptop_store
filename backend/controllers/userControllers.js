@@ -246,7 +246,7 @@ export const getUserList = async (req, res) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    const users = await User.find({}).skip(skip).limit(limit);
+    const users = await User.find({}).sort({ date: -1 }).skip(skip).limit(limit);
     const totalUsers = await User.countDocuments();
 
     res.json({

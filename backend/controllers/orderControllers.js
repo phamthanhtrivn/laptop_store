@@ -43,10 +43,10 @@ export const userOrders = async (req, res) => {
 export const allOrders = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1
-    const limit = 10
+    const limit = 5
     const skip = (page - 1) * limit
 
-    const orders = await Order.find({}).skip(skip).limit(limit)
+    const orders = await Order.find({}).sort({ date: -1 }) .skip(skip).limit(limit)
     const totalOrders = await Order.countDocuments()
 
     res.json({
