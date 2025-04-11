@@ -5,9 +5,12 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useToken } from "../context/TokenContextProvider";
+import { images } from "../assets/assets";
 
 const EditUserModal = ({ fetchUserData, id, isOpen, onClose }) => {
   const { backendUrl } = useToken();
+
+  const [isLoading, setIsLoading] = useState(false)
 
   const [cities, setCities] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -87,6 +90,7 @@ const EditUserModal = ({ fetchUserData, id, isOpen, onClose }) => {
   }, [isOpen]);
 
   const fetchUser = async () => {
+    setIsLoading(true)
     try {
       const response = await axios.get(backendUrl + `/api/user/get/${id}`);
       if (!response.data.success) {
@@ -125,6 +129,8 @@ const EditUserModal = ({ fetchUserData, id, isOpen, onClose }) => {
     } catch (err) {
       console.error("Lỗi khi load user:", err);
       toast.error("Đã có lỗi khi tải thông tin người dùng.");
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -135,54 +141,62 @@ const EditUserModal = ({ fetchUserData, id, isOpen, onClose }) => {
   }, [cities, id]);
 
   const handleUpdateUser = async () => {
-    const response = await axios.post(
-      backendUrl + `/api/user/check-password/${id}`,
-      { password }
-    );
-
-    if (
-      !name.match(/^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯàáâãèéêìíòóôõùúăđĩũơưẠ-ỹ\s]+$/)
-    ) {
-      toast.error("Tên không hợp lệ!");
-      return;
-    }
-
-    if (!phone.match(/^(0)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/)) {
-      toast.error("Số điện thoại không hợp lệ!");
-      return;
-    }
-
-    if (email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/)) {
-      toast.error("Email không hợp lệ!");
-      return;
-    }
-
-    if (response.data.success) {
-      const updateUser = {
-        name,
-        phone,
-        email,
-        address: {
-          city: selectedCity,
-          district: selectedDistrict,
-          ward: selectedWard,
-          street,
-        },
-      };
-
-      const response2 = await axios.post(
-        backendUrl + `/api/user/update/${id}`,
-        updateUser
+    setIsLoading(true)
+    try {
+      const response = await axios.post(
+        backendUrl + `/api/user/check-password/${id}`,
+        { password }
       );
-      if (response2.data.success) {
-        toast.success(response2.data.message);
-        fetchUserData();
-        onClose();
-      } else {
-        toast.error(response2.data.message);
+  
+      if (
+        !name.match(/^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯàáâãèéêìíòóôõùúăđĩũơưẠ-ỹ\s]+$/)
+      ) {
+        toast.error("Tên không hợp lệ!");
+        return;
       }
-    } else {
-      toast.error(response.data.message);
+  
+      if (!phone.match(/^(0)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/)) {
+        toast.error("Số điện thoại không hợp lệ!");
+        return;
+      }
+  
+      if (email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/)) {
+        toast.error("Email không hợp lệ!");
+        return;
+      }
+  
+      if (response.data.success) {
+        const updateUser = {
+          name,
+          phone,
+          email,
+          address: {
+            city: selectedCity,
+            district: selectedDistrict,
+            ward: selectedWard,
+            street,
+          },
+        };
+  
+        const response2 = await axios.post(
+          backendUrl + `/api/user/update/${id}`,
+          updateUser
+        );
+        if (response2.data.success) {
+          toast.success(response2.data.message);
+          fetchUserData();
+          onClose();
+        } else {
+          toast.error(response2.data.message);
+        }
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message)
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -194,9 +208,15 @@ const EditUserModal = ({ fetchUserData, id, isOpen, onClose }) => {
       onClick={handleOverlayClick}
       className="fixed inset-0 bg-white/20 backdrop-blur-xs flex items-center justify-center z-50"
     >
-      <div className="bg-white border border-gray-300 rounded-xl p-6 w-full max-w-5xl shadow-xl">
+      <div className="relative bg-white border border-gray-300 rounded-xl p-6 w-full max-w-5xl shadow-xl">
+        {isLoading && (
+                  <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
+                    <img src={images.Loading_icon} alt="loading" className="w-full" />
+                  </div>
+                )}
+        
         <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-6">
+          <h2 className="text-2xl font-bold mb-6 text-center bg-gradient-to-r from-red-500 to-indigo-500 text-white rounded py-5">
             Cập nhật thông tin người dùng
           </h2>
         </div>

@@ -8,10 +8,13 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useToken } from "../context/TokenContextProvider";
 import { toast } from "react-toastify";
 import axios from "axios";
+import AddProductModal from "../components/AddProductModal";
+import EditProductModal from "../components/EditProductModal";
+import Swal from "sweetalert2/dist/sweetalert2.js";
 
 const Products = () => {
   const { backendUrl, token } = useToken();
@@ -19,9 +22,40 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState({});
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const searchRef = useRef("");
+  const [selectedCate, setSelectedCate] = useState("")
+  const [selectedBrand, setSelectedBrand] = useState("")
+  const [selectedStock, setSelectedStock] = useState("")
+  const [productID, setProductID] = useState("")
+
+  const handleDeleteProduct = async (id) => {
+    Swal.fire({
+      title: "Bạn có muốn xóa người dùng này không?",
+      showDenyButton: true,
+      confirmButtonText: "Xóa",
+      denyButtonText: `Hủy`,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const response = await axios.post(
+          backendUrl + `/api/products/delete/${id}`, {},
+          { headers: { token } }
+        );
+        if (response.data.success) {
+          Swal.fire(response.data.message, "", "success");
+          fetchProductsData();
+        } else {
+          Swal.fire(response.data.message);
+        }
+      }
+    });
+  };
+
   const formatMoney = (number) => {
-    return number.toLocaleString('vi-VN')
-  }
+    return number.toLocaleString("vi-VN");
+  };
 
   const fetchProductsData = async () => {
     try {
@@ -43,6 +77,19 @@ const Products = () => {
     }
   };
 
+  const handleRefresh = () => {
+    searchRef.current.value = ""
+    setSelectedBrand("")
+    setSelectedCate("")
+    setSelectedStock("")
+    fetchProductsData()
+  };
+
+  const handleIDProduct = (id) => {
+    setProductID(id)
+    setShowEditModal(true)
+  }
+
   useEffect(() => {
     fetchProductsData();
   }, [page]);
@@ -55,6 +102,7 @@ const Products = () => {
           <div className="flex gap-5 text-gray-700 items-center">
             <label className="text-sm">Nhập tên sản phẩm cần tìm: </label>
             <input
+              ref={searchRef}
               type="text"
               placeholder="ex: Laptop Acer Swift 3 SF314 511 55QE"
               className="border border-gray-300 rounded-md px-3 py-2 w-full outline-none"
@@ -67,32 +115,51 @@ const Products = () => {
           <div className="flex gap-10">
             <div className="flex gap-5 items-center text-gray-700 mt-5">
               <label className="text-sm">Danh mục:</label>
-              <select className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none">
+              <select value={selectedCate} onChange={(e) => setSelectedCate(e.target.value)} className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none">
                 <option value="">Tất cả</option>
+                <option value="Đồ họa - Studio">Đồ họa - Studio</option>
+                <option value="Học sinh - Sinh viên">
+                  Học sinh - Sinh viên
+                </option>
+                <option value="Mỏng nhẹ cao cấp">Mỏng nhẹ cao cấp</option>
+                <option value="Gaming">Gaming</option>
               </select>
             </div>
             <div className="flex gap-5 items-center text-gray-700 mt-5">
               <label className="text-sm">Thương hiệu:</label>
-              <select className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none">
+              <select value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)} className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none">
                 <option value="">Tất cả</option>
+                <option value="ASUS">ASUS</option>
+                <option value="ACER">ACER</option>
+                <option value="MSI">MSI</option>
+                <option value="LENOVO">LENOVO</option>
+                <option value="DELL">DELL</option>
+                <option value="HP">HP</option>
+                <option value="LG">LG</option>
               </select>
             </div>
           </div>
           <div className="flex gap-5 items-center text-gray-700 mt-5">
             <label className="text-sm">Tồn kho:</label>
-            <select className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none">
+            <select value={selectedStock} onChange={(e) => setSelectedStock(e.target.value)} className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none">
               <option value="">Tất cả</option>
-              <option value="">Còn hàng</option>
-              <option value="">Hết hàng</option>
+              <option value="in-stock">Còn hàng</option>
+              <option value="out-of-stock">Hết hàng</option>
             </select>
           </div>
         </div>
         <div className="flex gap-5 items-center">
-          <button className="hover:text-red-500 hover:bg-white duration-300 transition-all cursor-pointer bg-red-500 border border-red-500 text-white flex px-4 py-2 rounded-md gap-5 font-medium">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="hover:text-red-500 hover:bg-white duration-300 transition-all cursor-pointer bg-red-500 border border-red-500 text-white flex px-4 py-2 rounded-md gap-5 font-medium"
+          >
             <BookmarkPlus />
             <p>Thêm</p>
           </button>
-          <button className="hover:bg-red-500 hover:text-white duration-300 transition-all cursor-pointer bg-white border border-red-500 text-red-500 flex px-4 py-2 rounded-md gap-5 font-medium">
+          <button
+            onClick={handleRefresh}
+            className="hover:bg-red-500 hover:text-white duration-300 transition-all cursor-pointer bg-white border border-red-500 text-red-500 flex px-4 py-2 rounded-md gap-5 font-medium"
+          >
             <RefreshCcw />
             <p>Tải lại</p>
           </button>
@@ -129,9 +196,9 @@ const Products = () => {
                 <td className="px-4 py-3">
                   <div className="flex justify-center gap-4">
                     <button className="text-yellow-500 hover:text-yellow-600 transition cursor-pointer">
-                      <Edit className="w-5 h-5" />
+                      <Edit onClick={() => handleIDProduct(product._id)} className="w-5 h-5" />
                     </button>
-                    <button className="text-red-500 hover:text-red-600 transition cursor-pointer">
+                    <button onClick={() => handleDeleteProduct(product._id)} className="text-red-500 hover:text-red-600 transition cursor-pointer">
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
@@ -167,6 +234,21 @@ const Products = () => {
           </button>
         </div>
       </div>
+      {showAddModal && (
+        <AddProductModal
+          fetchProductsData={fetchProductsData}
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+        />
+      )}
+      {showEditModal && (
+        <EditProductModal
+          id={productID}
+          fetchProductsData={fetchProductsData}
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
     </div>
   );
 };

@@ -4,9 +4,12 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useToken } from "../context/TokenContextProvider";
+import { images } from "../assets/assets";
 
 const AddUserModal = ({ fetchUserData, isOpen, onClose }) => {
   const { token, backendUrl } = useToken();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const [cities, setCities] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -60,90 +63,99 @@ const AddUserModal = ({ fetchUserData, isOpen, onClose }) => {
   }, [selectedDistrict]);
 
   const handleAddUser = async () => {
-    const name = nameRef.current.value;
-    const phone = phoneRef.current.value;
-    const email = emailRef.current.value;
-    const street = streetRef.current.value;
-    const password = passwordRef.current.value;
-    const password2 = password2Ref.current.value;
+    setIsLoading(true);
+    try {
+      const name = nameRef.current.value;
+      const phone = phoneRef.current.value;
+      const email = emailRef.current.value;
+      const street = streetRef.current.value;
+      const password = passwordRef.current.value;
+      const password2 = password2Ref.current.value;
 
-    if (
-      !name.match(/^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯàáâãèéêìíòóôõùúăđĩũơưẠ-ỹ\s]+$/)
-    ) {
-      toast.error("Tên không hợp lệ!");
-      nameRef.current.focus();
-      return;
-    }
+      if (
+        !name.match(
+          /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯàáâãèéêìíòóôõùúăđĩũơưẠ-ỹ\s]+$/
+        )
+      ) {
+        toast.error("Tên không hợp lệ!");
+        nameRef.current.focus();
+        return;
+      }
 
-    if (
-      !phone.match(/^(0)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/)
-    ) {
-      toast.error("Số điện thoại không hợp lệ!");
-      phoneRef.current.focus();
-      return;
-    }
+      if (
+        !phone.match(/^(0)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/)
+      ) {
+        toast.error("Số điện thoại không hợp lệ!");
+        phoneRef.current.focus();
+        return;
+      }
 
-    if (email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/)) {
-      toast.error("Email không hợp lệ!");
-      emailRef.current.focus();
-      return;
-    }
+      if (email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/)) {
+        toast.error("Email không hợp lệ!");
+        emailRef.current.focus();
+        return;
+      }
 
-    if (password.length < 8) {
-      toast.error("Mật khẩu không hợp lệ!");
-      passwordRef.current.focus();
-      return;
-    }
+      if (password.length < 8) {
+        toast.error("Mật khẩu không hợp lệ!");
+        passwordRef.current.focus();
+        return;
+      }
 
-    if (password !== password2) {
-      toast.error("Nhập lại mật khẩu không đúng!");
-      password2Ref.current.focus();
-      return;
-    }
+      if (password !== password2) {
+        toast.error("Nhập lại mật khẩu không đúng!");
+        password2Ref.current.focus();
+        return;
+      }
 
-    if (selectedCity === null) {
-      toast.error("Vui lòng chọn Tỉnh/Thành phố!");
-      return;
-    }
+      if (selectedCity === null) {
+        toast.error("Vui lòng chọn Tỉnh/Thành phố!");
+        return;
+      }
 
-    if (selectedDistrict === null) {
-      toast.error("Vui lòng chọn Quận/Huyện!");
-      return;
-    }
+      if (selectedDistrict === null) {
+        toast.error("Vui lòng chọn Quận/Huyện!");
+        return;
+      }
 
-    if (selectedWard === null) {
-      toast.error("Vui lòng chọn Phường/Xã!");
-      return;
-    }
+      if (selectedWard === null) {
+        toast.error("Vui lòng chọn Phường/Xã!");
+        return;
+      }
 
-    if (street === "") {
-      toast.error("Vui lòng nhập địa chỉ!");
-      return;
-    }
+      if (street === "") {
+        toast.error("Vui lòng nhập địa chỉ!");
+        return;
+      }
 
-    const newUser = {
-      name,
-      phone,
-      email,
-      password,
-      address: {
-        city: selectedCity.name,
-        district: selectedDistrict.name,
-        ward: selectedWard.name,
-        street,
-      },
-    };
+      const newUser = {
+        name,
+        phone,
+        email,
+        password,
+        address: {
+          city: selectedCity.name,
+          district: selectedDistrict.name,
+          ward: selectedWard.name,
+          street,
+        },
+      };
 
-    const response = await axios.post(backendUrl + `/api/user/add`, newUser, {
-      headers: { token },
-    });
-    if (response.data.success) {
-      toast.success(response.data.message);
-      fetchUserData()
-      onClose();
-    }
-    else {
-      toast.success(response.data.message);
+      const response = await axios.post(backendUrl + `/api/user/add`, newUser, {
+        headers: { token },
+      });
+      if (response.data.success) {
+        toast.success(response.data.message);
+        fetchUserData();
+        onClose();
+      } else {
+        toast.success(response.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    } finally {
+      setIsLoading(true);
     }
   };
 
@@ -161,9 +173,17 @@ const AddUserModal = ({ fetchUserData, isOpen, onClose }) => {
       onClick={handleOverlayClick}
       className="fixed inset-0 bg-white/20 backdrop-blur-xs flex items-center justify-center z-50"
     >
-      <div className="bg-white border border-gray-300 rounded-xl p-6 w-full max-w-5xl shadow-xl">
+      <div className="relative bg-white border border-gray-300 rounded-xl p-6 w-full max-w-5xl shadow-xl">
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
+            <img src={images.Loading_icon} alt="loading" className="w-full" />
+          </div>
+        )}
+
         <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-6">Thêm người dùng</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center bg-gradient-to-r from-red-500 to-indigo-500 text-white rounded py-5">
+            Thêm người dùng
+          </h2>
         </div>
 
         <div className="flex gap-10 justify-between">
