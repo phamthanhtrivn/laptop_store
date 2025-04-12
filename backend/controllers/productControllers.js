@@ -7,8 +7,20 @@ export const productList = async (req, res) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    const products = await Product.find({}).sort({ date: -1}).skip(skip).limit(limit);
-    const totalProducts = await Product.countDocuments();
+    const { search, brand, category, stock } = req.query;
+
+    const query = {};
+
+    if (search) {
+      query.name = { $regex: search, $options: "i" }; 
+    }
+    if (brand) query.brand = brand;
+    if (category) query.category = category;
+    if (stock === "in-stock") query.stock = { $gt: 0 };
+    if (stock === "out-of-stock") query.stock = { $eq: 0 };
+
+    const products = await Product.find(query).sort({ date: -1}).skip(skip).limit(limit);
+    const totalProducts = await Product.countDocuments(query);
 
     res.json({ 
       success: true,

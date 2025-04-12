@@ -92,8 +92,8 @@ const EditProductModal = ({ id, fetchProductsData, isOpen, onClose }) => {
         return;
       }
 
-      if (!/^\d+$/.test(price)) {
-        toast.error("Giá sản phẩm phải là số hợp lệ!");
+      if (isNaN(price) || Number(price) <= 0) {
+        toast.error("Giá sản phẩm phải là số lớn hơn 0!");
         priceRef.current.focus();
         return;
       }
@@ -104,8 +104,8 @@ const EditProductModal = ({ id, fetchProductsData, isOpen, onClose }) => {
         return;
       }
 
-      if (!/^\d+$/.test(stock)) {
-        toast.error("Số lượng sản phẩm phải là số hợp lệ!");
+      if (isNaN(stock) || Number(stock) < 0) {
+        toast.error("Số lượng sản phẩm phải là số lớn hơn hoặc bằng 0!");
         stockRef.current.focus();
         return;
       }

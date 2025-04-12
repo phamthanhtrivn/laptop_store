@@ -26,10 +26,15 @@ const Products = () => {
   const [showEditModal, setShowEditModal] = useState(false);
 
   const searchRef = useRef("");
-  const [selectedCate, setSelectedCate] = useState("")
-  const [selectedBrand, setSelectedBrand] = useState("")
-  const [selectedStock, setSelectedStock] = useState("")
-  const [productID, setProductID] = useState("")
+  const [selectedCate, setSelectedCate] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedStock, setSelectedStock] = useState("");
+  const [productID, setProductID] = useState("");
+
+  const applyFilters = () => {
+    fetchProductsData()
+    setPage(1);
+  };
 
   const handleDeleteProduct = async (id) => {
     Swal.fire({
@@ -40,7 +45,8 @@ const Products = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         const response = await axios.post(
-          backendUrl + `/api/products/delete/${id}`, {},
+          backendUrl + `/api/products/delete/${id}`,
+          {},
           { headers: { token } }
         );
         if (response.data.success) {
@@ -59,12 +65,16 @@ const Products = () => {
 
   const fetchProductsData = async () => {
     try {
-      const response = await axios.get(
-        backendUrl + `/api/products?page=${page}`,
-        {
-          headers: { token },
-        }
-      );
+      const response = await axios.get(backendUrl + `/api/products`, {
+        params: {
+          page,
+          search: searchRef.current.value,
+          brand: selectedBrand,
+          category: selectedCate,
+          stock: selectedStock,
+        },
+        headers: { token },
+      });
       if (response.data.success) {
         setProducts(response.data.products);
         setPagination(response.data.pagination);
@@ -78,21 +88,21 @@ const Products = () => {
   };
 
   const handleRefresh = () => {
-    searchRef.current.value = ""
-    setSelectedBrand("")
-    setSelectedCate("")
-    setSelectedStock("")
-    fetchProductsData()
+    searchRef.current.value = "";
+    setSelectedBrand("");
+    setSelectedCate("");
+    setSelectedStock("");
+    setPage(1)
   };
 
   const handleIDProduct = (id) => {
-    setProductID(id)
-    setShowEditModal(true)
-  }
+    setProductID(id);
+    setShowEditModal(true);
+  };
 
   useEffect(() => {
     fetchProductsData();
-  }, [page]);
+  }, [page, selectedBrand, selectedCate, selectedStock]);
 
   return (
     <div className="p-5">
@@ -107,15 +117,15 @@ const Products = () => {
               placeholder="ex: Laptop Acer Swift 3 SF314 511 55QE"
               className="border border-gray-300 rounded-md px-3 py-2 w-full outline-none"
             />
-            <button className="items-center w-[250px] hover:text-red-500 hover:bg-white duration-300 transition-all cursor-pointer bg-red-500 border border-red-500 text-white flex px-4 py-2 rounded-md gap-5 font-medium">
-              <Search />
-              <p>Tìm kiếm</p>
-            </button>
           </div>
           <div className="flex gap-10">
             <div className="flex gap-5 items-center text-gray-700 mt-5">
               <label className="text-sm">Danh mục:</label>
-              <select value={selectedCate} onChange={(e) => setSelectedCate(e.target.value)} className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none">
+              <select
+                value={selectedCate}
+                onChange={(e) => setSelectedCate(e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none"
+              >
                 <option value="">Tất cả</option>
                 <option value="Đồ họa - Studio">Đồ họa - Studio</option>
                 <option value="Học sinh - Sinh viên">
@@ -127,7 +137,11 @@ const Products = () => {
             </div>
             <div className="flex gap-5 items-center text-gray-700 mt-5">
               <label className="text-sm">Thương hiệu:</label>
-              <select value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)} className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none">
+              <select
+                value={selectedBrand}
+                onChange={(e) => setSelectedBrand(e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none"
+              >
                 <option value="">Tất cả</option>
                 <option value="ASUS">ASUS</option>
                 <option value="ACER">ACER</option>
@@ -139,13 +153,21 @@ const Products = () => {
               </select>
             </div>
           </div>
-          <div className="flex gap-5 items-center text-gray-700 mt-5">
+          <div className="flex gap-10 items-center text-gray-700 mt-5">
             <label className="text-sm">Tồn kho:</label>
-            <select value={selectedStock} onChange={(e) => setSelectedStock(e.target.value)} className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none">
+            <select
+              value={selectedStock}
+              onChange={(e) => setSelectedStock(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none"
+            >
               <option value="">Tất cả</option>
               <option value="in-stock">Còn hàng</option>
               <option value="out-of-stock">Hết hàng</option>
             </select>
+            <button onClick={applyFilters} className="hover:text-red-500 hover:bg-white duration-300 transition-all cursor-pointer bg-red-500 border border-red-500 text-white flex px-4 py-2 rounded-md gap-5 font-medium">
+              <Search />
+              <p>Tìm kiếm</p>
+            </button>
           </div>
         </div>
         <div className="flex gap-5 items-center">
@@ -196,9 +218,15 @@ const Products = () => {
                 <td className="px-4 py-3">
                   <div className="flex justify-center gap-4">
                     <button className="text-yellow-500 hover:text-yellow-600 transition cursor-pointer">
-                      <Edit onClick={() => handleIDProduct(product._id)} className="w-5 h-5" />
+                      <Edit
+                        onClick={() => handleIDProduct(product._id)}
+                        className="w-5 h-5"
+                      />
                     </button>
-                    <button onClick={() => handleDeleteProduct(product._id)} className="text-red-500 hover:text-red-600 transition cursor-pointer">
+                    <button
+                      onClick={() => handleDeleteProduct(product._id)}
+                      className="text-red-500 hover:text-red-600 transition cursor-pointer"
+                    >
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
