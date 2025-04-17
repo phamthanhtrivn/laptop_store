@@ -2,33 +2,42 @@ import { images } from "../assets/assets";
 
 const Footer = () => {
   return (
-    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] flex flex-col lg:flex-row items-start justify-start gap-15 py-10">
-      <div className="flex flex-col gap-3 text-sm">
-        <p className="text-lg font-medium my-2">Về chúng tôi</p>
-        <p>Giới thiệu</p>
-        <p>Liên hệ</p>
-      </div>
-      <div className="flex flex-col gap-3 text-sm">
-        <p className="text-lg font-medium my-2">Chính sách</p>
-        <p>Chính sách bảo hành</p>
-        <p>Chính sách giao hàng</p>
-        <p>Chính sách bảo mật</p>
-      </div>
-      <div className="flex flex-col gap-3 text-sm">
-        <p className="text-lg font-medium my-2">Thông tin</p>
-        <p>Hướng dẫn mua hàng</p>
-        <p>Hướng dẫn thanh toán</p>
-        <p>Tra cứu địa chỉ bảo hành</p>
-      </div>
-      <div className="flex flex-col gap-3 text-sm">
-        <p className="text-lg font-medium my-2">Cách thức thanh toán</p>
-        <div className="flex gap-2 w-20">
-          <img src={images.cod} alt="cod" />
-          <img src={images.momo} alt="momo" />
-          <img src={images.visa} alt="visa" />
+    <footer className="bg-gray-100 py-10 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+      <div className="container mx-auto flex flex-col lg:flex-row items-start justify-start gap-15">
+        {/* About Us Section */}
+        <div className="flex flex-col gap-3 text-sm">
+          <p className="text-lg font-semibold text-red-600 my-2">Về chúng tôi</p>
+          <a href="#" className="text-gray-600 hover:text-red-600 transition-all">Giới thiệu</a>
+          <a href="#" className="text-gray-600 hover:text-red-600 transition-all">Liên hệ</a>
+        </div>
+
+        {/* Policies Section */}
+        <div className="flex flex-col gap-3 text-sm">
+          <p className="text-lg font-semibold text-red-600 my-2">Chính sách</p>
+          <a href="#" className="text-gray-600 hover:text-red-600 transition-all">Chính sách bảo hành</a>
+          <a href="#" className="text-gray-600 hover:text-red-600 transition-all">Chính sách giao hàng</a>
+          <a href="#" className="text-gray-600 hover:text-red-600 transition-all">Chính sách bảo mật</a>
+        </div>
+
+        {/* Information Section */}
+        <div className="flex flex-col gap-3 text-sm">
+          <p className="text-lg font-semibold text-red-600 my-2">Thông tin</p>
+          <a href="#" className="text-gray-600 hover:text-red-600 transition-all">Hướng dẫn mua hàng</a>
+          <a href="#" className="text-gray-600 hover:text-red-600 transition-all">Hướng dẫn thanh toán</a>
+          <a href="#" className="text-gray-600 hover:text-red-600 transition-all">Tra cứu địa chỉ bảo hành</a>
+        </div>
+
+        {/* Payment Methods Section */}
+        <div className="flex flex-col gap-3 text-sm">
+          <p className="text-lg font-semibold text-red-600 my-2">Cách thức thanh toán</p>
+          <div className="flex gap-2">
+            <img src={images.cod} alt="COD" className="w-8 h-auto transition-transform transform hover:scale-110" />
+            <img src={images.momo} alt="Momo" className="w-8 h-auto transition-transform transform hover:scale-110" />
+            <img src={images.visa} alt="Visa" className="w-8 h-auto transition-transform transform hover:scale-110" />
+          </div>
         </div>
       </div>
-    </div>
+    </footer>
   );
 };
 
