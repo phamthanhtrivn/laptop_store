@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { images } from "../assets/assets";
 import { Menu, Search, ShoppingCart, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
-  const [showModal, setShowModal] = useState(false); // Hiển thị modal
+  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
   const modalRef = useRef();
 
   // Ẩn modal khi click ra ngoài
@@ -21,7 +23,7 @@ const Header = () => {
     <div>
       <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] bg-[#E30019] text-white py-4 flex justify-between">
         <div className="flex gap-4 items-center">
-          <div className="w-40">
+          <div onClick={() => navigate("/")} className="w-40">
             <img className="w-full" src={images.logo} alt="logo" />
           </div>
           <div className="relative">
@@ -83,6 +85,9 @@ const Header = () => {
             <span className="text-red-600 font-bold text-2xl">&times;</span>
           </div>
           <h3 className="font-semibold text-xl mb-4">Chọn danh mục</h3>
+          <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200">
+            Tất cả
+          </div>
           <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200">
             Đồ họa - Studio
           </div>

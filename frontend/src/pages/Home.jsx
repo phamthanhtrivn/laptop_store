@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   BookText,
   ChevronRight,
@@ -17,6 +17,7 @@ import ProductItem from "../components/ProductItem";
 
 const Home = () => {
   const [laptops, setLaptops] = useState([]);
+  const navigate = useNavigate();
 
   const fetchLaptops = async () => {
     try {
@@ -60,10 +61,10 @@ const Home = () => {
 
                 {/* Buttons */}
                 <div className="flex flex-col gap-4 min-[400px]:flex-row mt-2 justify-center lg:justify-start">
-                  <button className="cursor-pointer px-8 py-3 bg-[#E30019] text-white rounded-md font-medium border border-[#E30019] hover:text-[#E30019] hover:bg-white transition-all duration-300 transform hover:scale-105">
+                  <button onClick={() => navigate('/products')} className="cursor-pointer px-8 py-3 bg-[#E30019] text-white rounded-md font-medium border border-[#E30019] hover:text-[#E30019] hover:bg-white transition-all duration-300 transform hover:scale-105">
                     Mua ngay
                   </button>
-                  <button className="cursor-pointer px-8 py-3 rounded-md font-medium border border-[#E30019] text-[#E30019] bg-white hover:bg-[#E30019] hover:text-white transition-all duration-300 transform hover:scale-105">
+                  <button onClick={() => navigate('/products')} className="cursor-pointer px-8 py-3 rounded-md font-medium border border-[#E30019] text-[#E30019] bg-white hover:bg-[#E30019] hover:text-white transition-all duration-300 transform hover:scale-105">
                     Xem thêm
                   </button>
                 </div>
@@ -104,7 +105,7 @@ const Home = () => {
               ))}
             </div>
             <div className="flex justify-center">
-              <button className="cursor-pointer flex items-center gap-1 px-8 py-3 bg-[#E30019] text-white rounded-md font-medium border border-[#E30019] hover:text-[#E30019] hover:bg-white transition-all duration-300 transform hover:scale-105">
+              <button onClick={() => navigate('/products')} className="cursor-pointer flex items-center gap-1 px-8 py-3 bg-[#E30019] text-white rounded-md font-medium border border-[#E30019] hover:text-[#E30019] hover:bg-white transition-all duration-300 transform hover:scale-105">
                 Xem tất cả sản phẩm
                 <ChevronRight className="h-4 w-4" />
               </button>

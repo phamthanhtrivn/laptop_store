@@ -6,7 +6,7 @@ import User from "./pages/User";
 import Header from "./components/Header";
 import { ToastContainer } from 'react-toastify';
 import ProductDetail from "./pages/ProductDetail";
-import ProductList from "./pages/ProductList";
+import Products from "./pages/Products";
 
 const App = () => {
   return (
@@ -19,7 +19,7 @@ const App = () => {
           <Route path="/cart" element={<Cart />} />
           <Route path="/user" element={<User />} />
           <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/products" element={<ProductList />} />
+          <Route path="/products" element={<Products />} />
         </Routes>
       </div>
       <Footer />
