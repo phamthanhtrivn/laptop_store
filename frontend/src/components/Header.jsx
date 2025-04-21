@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { images } from "../assets/assets";
 import { Menu, Search, ShoppingCart, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -50,17 +50,17 @@ const Header = () => {
 
         {/* Giỏ hàng và Đăng nhập */}
         <div className="flex items-center gap-2 font-medium">
-          <div className="relative">
+          <NavLink to="/cart" className="relative">
             <ShoppingCart size={28} />
             <p className="absolute -right-2 -top-1 flex items-center justify-center w-5 h-5 text-red-500 bg-white rounded-full text-[10px] font-bold shadow-md">
               0
             </p>
-          </div>
+          </NavLink>
           <div className="flex gap-3"></div>
-          <div className="flex items-center gap-3 bg-[#BE1529] px-3 py-1.5 font-medium rounded">
+          <NavLink to="/login" className="flex items-center gap-3 bg-[#BE1529] px-3 py-1.5 font-medium rounded">
             <User className="text-white" size={28} />
             <p className="hidden md:block">Đăng nhập</p>
-          </div>
+          </NavLink>
         </div>
       </div>
 
