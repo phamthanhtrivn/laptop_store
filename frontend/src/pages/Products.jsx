@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Link } from "react-router-dom";
-import { ChevronRight, ShoppingCart, Star } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -70,7 +70,7 @@ const Products = () => {
 
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] flex flex-col min-h-screen pb-10">
-      <div className="">
+      <div className=""> 
         <div className="container mx-auto px-4 p-9">
           <div className="flex flex-col space-y-3">
             <div className="flex items-center text-sm text-gray-500">
