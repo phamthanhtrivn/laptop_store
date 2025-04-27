@@ -43,19 +43,33 @@ export const productListUser = async (req, res) => {
     const limit = 9;
     const skip = (page - 1) * limit;
 
-    const { search, brand, category, stock } = req.query;
+    const { search, brand, category, sort, price} = req.query;
+    
 
-    const query = {};
+    let query = {};
 
     if (search) {
       query.name = { $regex: search, $options: "i" }; 
     }
-    if (brand) query.brand = brand;
+    if (brand) {
+      query.brand = { $in: brand.split(",")}
+    }
     if (category) query.category = category;
-    if (stock === "in-stock") query.stock = { $gt: 0 };
-    if (stock === "out-of-stock") query.stock = { $eq: 0 };
+    if (price && price.min !== undefined && price.max !== undefined) {
+      const minPrice = Number(price.min);
+      const maxPrice = Number(price.max);
 
-    const products = await Product.find(query).sort({ date: -1}).skip(skip).limit(limit);
+      if (minPrice > 0 || maxPrice > 0) {
+        query.price = { $gte: minPrice, $lte: maxPrice };
+      }
+    }
+
+    let sortOption = {}
+    if (sort === "price-asc") sortOption.price = 1
+    else if (sort === "price-desc") sortOption.price = -1;
+    else sortOption.date = -1
+
+    const products = await Product.find(query).skip(skip).limit(limit).sort(sortOption);
     const totalProducts = await Product.countDocuments(query);
 
     res.json({ 

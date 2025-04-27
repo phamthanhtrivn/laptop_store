@@ -4,11 +4,15 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ChevronRight } from "lucide-react";
+import { addToCart } from "../store/cartSlice";
+import { useDispatch } from "react-redux";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [image, setImage] = useState("");
+  const dispatch = useDispatch()
+  const [quantity, setQuantity] = useState(1);
 
   const fetchProduct = async () => {
     try {
@@ -96,8 +100,9 @@ const ProductDetail = () => {
               {product.stock > 0 ? "Còn hàng" : "Hết hàng"}
             </p>
             <div className="flex flex-row gap-4 mt-5">
-              <input defaultValue={1} type="number" className="w-1/3 border border-gray-300 px-3 rounded-xl" />
+              <input min={1} max={99} type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="w-1/3 border border-gray-300 px-3 rounded-xl" />
               <button 
+              onClick={() => dispatch(addToCart({ ...product, quantity }))}
                 disabled={product.stock <= 0}
                 className="w-full py-3 rounded-xl text-white font-semibold bg-red-600 hover:bg-red-700 disabled:opacity-50 transition"
               >

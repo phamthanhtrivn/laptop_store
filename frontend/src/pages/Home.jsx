@@ -3,11 +3,8 @@ import {
   BookText,
   ChevronRight,
   Feather,
-  FileImage,
   Headset,
   PaintBucket,
-  ShoppingCart,
-  Star,
 } from "lucide-react";
 import { images } from "../assets/assets";
 import { useEffect, useState } from "react";
@@ -18,6 +15,13 @@ import ProductItem from "../components/ProductItem";
 const Home = () => {
   const [laptops, setLaptops] = useState([]);
   const navigate = useNavigate();
+
+  const categories = [
+    "Đồ họa - Studio",
+    "Học sinh - Sinh viên",
+    "Mỏng nhẹ cao cấp",
+    "Gaming",
+  ];
 
   const fetchLaptops = async () => {
     try {
@@ -130,7 +134,7 @@ const Home = () => {
             <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 py-16 sm:grid-cols-2 md:gap-10 lg:grid-cols-4">
               {/* Category Item */}
               <Link
-                to="#"
+                to={`/products/category/${categories[0]}`}
                 className="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-gray-200 bg-white p-8 shadow-md transition-all hover:border-rose-400 hover:shadow-xl hover:scale-105 duration-300"
               >
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-rose-100 mb-6 transition-colors group-hover:bg-rose-200">
@@ -146,7 +150,7 @@ const Home = () => {
 
               {/* Category Item */}
               <Link
-                to="#"
+                to={`/products/category/${categories[1]}`}
                 className="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-gray-200 bg-white p-8 shadow-md transition-all hover:border-rose-400 hover:shadow-xl hover:scale-105 duration-300"
               >
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-rose-100 mb-6 transition-colors group-hover:bg-rose-200">
@@ -163,7 +167,7 @@ const Home = () => {
 
               {/* Category Item */}
               <Link
-                to="#"
+                to={`/products/category/${categories[2]}`}
                 className="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-gray-200 bg-white p-8 shadow-md transition-all hover:border-rose-400 hover:shadow-xl hover:scale-105 duration-300"
               >
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-rose-100 mb-6 transition-colors group-hover:bg-rose-200">
@@ -179,7 +183,7 @@ const Home = () => {
 
               {/* Category Item */}
               <Link
-                to="#"
+                to={`/products/category/${categories[3]}`}
                 className="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-gray-200 bg-white p-8 shadow-md transition-all hover:border-rose-400 hover:shadow-xl hover:scale-105 duration-300"
               >
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-rose-100 mb-6 transition-colors group-hover:bg-rose-200">

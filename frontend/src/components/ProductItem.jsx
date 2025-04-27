@@ -1,8 +1,12 @@
 import { ShoppingCart } from "lucide-react";
 import React from "react";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import { addToCart } from "../store/cartSlice";
 
 const ProductItem = ({ product }) => {
+  const dispatch = useDispatch();
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -46,11 +50,11 @@ const ProductItem = ({ product }) => {
 
         {/* Price + Button */}
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-xl font-bold text-rose-600">
+          <span className="text-xl font-bold text-red-600">
             {formatPrice(product.price)}
           </span>
 
-          <button className="cursor-pointer relative inline-flex items-center gap-1 rounded-md bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-600 transition-all z-20">
+          <button onClick={() => dispatch(addToCart({...product, quantity: 1}))} className="cursor-pointer relative inline-flex items-center gap-1 rounded-md bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 transition-all z-20">
             <ShoppingCart className="h-4 w-4" />
             Thêm
           </button>

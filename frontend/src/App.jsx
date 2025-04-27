@@ -13,6 +13,7 @@ const App = () => {
   return (
     <div>
       <Header />
+      <div className="h-20"></div>
       <ToastContainer />
       <div className="bg-gray-50">
         <Routes>
@@ -20,6 +21,7 @@ const App = () => {
           <Route path="/cart" element={<Cart />} />
           <Route path="/user" element={<UserDetail />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/products/category/:category" element={<Products />} />
           <Route path="/products" element={<Products />} />
           <Route path="/login" element={<Login />} />
           <Route path="/product/:id" element={<ProductDetail />} />

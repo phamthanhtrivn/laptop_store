@@ -2,13 +2,35 @@ import { useEffect, useRef, useState } from "react";
 import { images } from "../assets/assets";
 import { Menu, Search, ShoppingCart, User } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setSearchQuery } from "../store/searchSlice";
+import { clearCategory, setCategory } from "../store/categorySlice";
 
 const Header = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const searchQuery = useSelector((state) => state.search.searchQuery);
+  const selectedCategory = useSelector(
+    (state) => state.category.selectedCategory
+  );
+  const totalQuantity = useSelector((state) => state.cart.totalQuantity);
   const [showModal, setShowModal] = useState(false);
   const modalRef = useRef();
 
-  // Ẩn modal khi click ra ngoài
+  const categories = [
+    "Đồ họa - Studio",
+    "Học sinh - Sinh viên",
+    "Mỏng nhẹ cao cấp",
+    "Gaming",
+  ];
+
+  const handleSearch = (e) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      navigate("/products");
+      setShowModal(false);
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -21,7 +43,7 @@ const Header = () => {
 
   return (
     <div>
-      <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] bg-[#E30019] text-white py-4 flex justify-between">
+      <div className="fixed top-0 left-0 w-full z-99 shadow-md px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] bg-[#E30019] text-white py-4 flex justify-between">
         <div className="flex gap-4 items-center">
           <div onClick={() => navigate("/")} className="w-40">
             <img className="w-full" src={images.logo} alt="logo" />
@@ -40,11 +62,18 @@ const Header = () => {
           <div className="bg-white lg:flex items-center rounded px-3 py-1.5 hidden ">
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+              onKeyDown={handleSearch}
               className="text-black outline-none w-70"
               placeholder="Bạn cần tìm gì?"
               required
             />
-            <Search size={28} className="text-gray-700 cursor-pointer" />
+            <Search
+              size={28}
+              onClick={() => searchQuery.trim() && navigate("/products")}
+              className="text-gray-700 cursor-pointer"
+            />
           </div>
         </div>
 
@@ -53,11 +82,14 @@ const Header = () => {
           <NavLink to="/cart" className="relative">
             <ShoppingCart size={28} />
             <p className="absolute -right-2 -top-1 flex items-center justify-center w-5 h-5 text-red-500 bg-white rounded-full text-[10px] font-bold shadow-md">
-              0
+              {totalQuantity}
             </p>
           </NavLink>
           <div className="flex gap-3"></div>
-          <NavLink to="/login" className="flex items-center gap-3 bg-[#BE1529] px-3 py-1.5 font-medium rounded">
+          <NavLink
+            to="/login"
+            className="flex items-center gap-3 bg-[#BE1529] px-3 py-1.5 font-medium rounded"
+          >
             <User className="text-white" size={28} />
             <p className="hidden md:block">Đăng nhập</p>
           </NavLink>
@@ -67,7 +99,7 @@ const Header = () => {
       {/* Overlay khi modal mở */}
       {showModal && (
         <div
-          className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-40"
+          className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-999"
           onClick={() => setShowModal(false)} // Đóng modal khi click vào overlay
         ></div>
       )}
@@ -76,7 +108,7 @@ const Header = () => {
       {showModal && (
         <div
           ref={modalRef}
-          className="fixed top-0 left-0 z-50 w-60 h-full bg-white shadow-lg p-6 animate-slide-in"
+          className="fixed top-0 left-0 z-999 w-60 h-full bg-white shadow-lg p-6 animate-slide-in"
         >
           <div
             className="absolute top-4 right-4 cursor-pointer"
@@ -85,21 +117,35 @@ const Header = () => {
             <span className="text-red-600 font-bold text-2xl">&times;</span>
           </div>
           <h3 className="font-semibold text-xl mb-4">Chọn danh mục</h3>
-          <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200">
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch(clearCategory());
+              navigate("/products");
+              setShowModal(false);
+            }}
+            className={`px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 ${
+              !selectedCategory ? "bg-gray-200 font-semibold" : ""
+            }`}
+          >
             Tất cả
           </div>
-          <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200">
-            Đồ họa - Studio
-          </div>
-          <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200">
-            Học sinh - Sinh viên
-          </div>
-          <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200">
-            Mỏng nhẹ cao cấp
-          </div>
-          <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-            Gaming
-          </div>
+          {categories.map((cat, index) => (
+            <div
+              key={index}
+              className={`px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 ${
+                selectedCategory === cat ? "bg-gray-200 font-semibold" : ""
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch(setCategory(cat));
+                navigate(`/products/category/${cat}`);
+                setShowModal(false);
+              }}
+            >
+              {cat}
+            </div>
+          ))}
         </div>
       )}
     </div>
