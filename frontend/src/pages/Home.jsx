@@ -11,21 +11,15 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import ProductItem from "../components/ProductItem";
+import { backendUrl, categories } from "../config/config";
 
 const Home = () => {
   const [laptops, setLaptops] = useState([]);
   const navigate = useNavigate();
 
-  const categories = [
-    "Đồ họa - Studio",
-    "Học sinh - Sinh viên",
-    "Mỏng nhẹ cao cấp",
-    "Gaming",
-  ];
-
   const fetchLaptops = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/products");
+      const response = await axios.get(backendUrl + "/api/products");
       if (response.data.success) {
         setLaptops(response.data.products);
       } else {

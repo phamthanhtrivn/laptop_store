@@ -8,6 +8,7 @@ import ProductItem from "../components/ProductItem";
 import { useDispatch, useSelector } from "react-redux";
 import { clearCategory, setCategory } from "../store/categorySlice";
 import { clearSearchQuery } from "../store/searchSlice";
+import { backendUrl, brands, categories, priceRanges } from "../config/config";
 
 const Products = () => {
   const navigate = useNavigate();
@@ -16,7 +17,6 @@ const Products = () => {
   const [loading, setLoading] = useState(false);
   const selectedCategory = useSelector((state) => state.category.selectedCategory);
   const searchQuery = useSelector((state) => state.search.searchQuery); 
-  const brands = ["ASUS", "ACER", "MSI", "LENOVO", "DELL", "HP", "LG"];
 
   const [laptops, setLaptops] = useState([]);
   const [pagination, setPagination] = useState({
@@ -26,20 +26,7 @@ const Products = () => {
     limitPerPage: 9,
   });
 
-  const priceRanges = [
-    { label: "Mặc định", min: 0, max: 0 },
-    { label: "Dưới 10 triệu", min: 0, max: 10000000 },
-    { label: "10 triệu - 20 triệu", min: 10000000, max: 20000000 },
-    { label: "20 triệu - 30 triệu", min: 20000000, max: 30000000 },
-    { label: "Trên 30 triệu", min: 30000000, max: 100000000 },
-  ];
-
-  const categories = [
-    "Đồ họa - Studio",
-    "Học sinh - Sinh viên",
-    "Mỏng nhẹ cao cấp",
-    "Gaming",
-  ];
+  
 
   const [selectedRange, setSelectedRange] = useState(priceRanges[0]);
   const [selectedBrand, setSelectedBrand] = useState([]);
@@ -79,7 +66,7 @@ const Products = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        "http://localhost:5000/api/products/users",
+        backendUrl + "/api/products/users",
         {
           params: {
             page: pagination.currentPage,

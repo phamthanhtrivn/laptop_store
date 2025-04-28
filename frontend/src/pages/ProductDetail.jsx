@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { ChevronRight } from "lucide-react";
 import { addToCart } from "../store/cartSlice";
 import { useDispatch } from "react-redux";
+import { backendUrl } from "../config/config";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -17,7 +18,7 @@ const ProductDetail = () => {
   const fetchProduct = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/products/get/${id}`
+        `${backendUrl}/api/products/get/${id}`
       );
       if (response.data.success) {
         setProduct(response.data.product);
