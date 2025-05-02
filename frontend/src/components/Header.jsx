@@ -52,14 +52,14 @@ const Header = () => {
             {/* Nút Danh mục */}
             <div
               className="flex items-center gap-3 bg-[#BE1529] px-3 py-1.5 font-medium rounded cursor-pointer"
-              onClick={() => setShowModal(!showModal)} // Mở modal khi nhấn
+              onClick={() => setShowModal(!showModal)}
             >
               <Menu className="text-white" size={28} />
               <p className="hidden md:block">Danh mục</p>
             </div>
           </div>
           {/* Thanh tìm kiếm */}
-          <div className="bg-white lg:flex items-center rounded px-3 py-1.5 hidden ">
+          <div className="bg-white lg:flex items-center rounded px-3 py-1.5 hidden">
             <input
               type="text"
               value={searchQuery}
@@ -100,7 +100,7 @@ const Header = () => {
       {showModal && (
         <div
           className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-999"
-          onClick={() => setShowModal(false)} // Đóng modal khi click vào overlay
+          onClick={() => setShowModal(false)}
         ></div>
       )}
 
@@ -114,7 +114,7 @@ const Header = () => {
             className="absolute top-4 right-4 cursor-pointer"
             onClick={() => setShowModal(false)}
           >
-            <span className="text-red-600 font-bold text-2xl">&times;</span>
+            <span className="text-red-600 font-bold text-2xl">×</span>
           </div>
           <h3 className="font-semibold text-xl mb-4">Chọn danh mục</h3>
           <div

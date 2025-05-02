@@ -4,22 +4,21 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ChevronRight } from "lucide-react";
-import { addToCart } from "../store/cartSlice";
 import { useDispatch } from "react-redux";
+import { addItemToCart } from "../store/cartSlice";
 import { backendUrl } from "../config/config";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [image, setImage] = useState("");
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
 
   const fetchProduct = async () => {
     try {
-      const response = await axios.get(
-        `${backendUrl}/api/products/get/${id}`
-      );
+      const response = await axios.get(`${backendUrl}/api/products/get/${id}`);
       if (response.data.success) {
         setProduct(response.data.product);
         setImage(response.data.product.images[0]);
@@ -34,13 +33,40 @@ const ProductDetail = () => {
 
   useEffect(() => {
     fetchProduct();
-  }, []);
+  }, [id]);
+
+  const handleQuantityChange = (e) => {
+    const value = Number(e.target.value);
+    if (value < 1) {
+      setQuantity(1);
+    } else if (product && value > product.stock) {
+      setQuantity(product.stock);
+      toast.warn(`Chỉ còn ${product.stock} sản phẩm trong kho`);
+    } else {
+      setQuantity(value);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (isAdding || !product || product.stock <= 0) return;
+    setIsAdding(true);
+    try {
+      await dispatch(addItemToCart({ ...product, quantity })).unwrap();
+      toast.success("Thêm vào giỏ hàng thành công!");
+    } catch (error) {
+      console.log(error.message);
+      toast.error(
+        error.message || "Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng!"
+      );
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   if (!product) return null;
 
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] min-h-screen">
-      {/* Breadcrumbs */}
       <div className="py-9">
         <div className="flex items-center text-sm text-gray-500">
           <Link to="/" className="hover:text-blue-600">
@@ -56,7 +82,6 @@ const ProductDetail = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* Ảnh sản phẩm */}
         <div className="space-y-4">
           <div className="w-full aspect-square bg-gray-100 rounded-2xl overflow-hidden">
             <img
@@ -66,7 +91,6 @@ const ProductDetail = () => {
             />
           </div>
 
-          {/* Thumbnails - responsive */}
           <div className="flex md:grid md:grid-cols-4 gap-3 overflow-x-auto md:overflow-visible">
             {product.images?.map((img, idx) => (
               <button
@@ -79,14 +103,13 @@ const ProductDetail = () => {
                 <img
                   src={img}
                   alt={`Thumbnail ${idx}`}
-                  className="w-full h-full object-contain" // Chỉnh sửa object-contain để giữ tỷ lệ ảnh
+                  className="w-full h-full object-contain"
                 />
               </button>
             ))}
           </div>
         </div>
 
-        {/* Thông tin sản phẩm */}
         <div className="space-y-6">
           <div>
             <h1 className="text-4xl font-bold text-gray-800">{product.name}</h1>
@@ -98,16 +121,28 @@ const ProductDetail = () => {
               {product.price.toLocaleString()}₫
             </p>
             <p className="text-sm text-gray-500">
-              {product.stock > 0 ? "Còn hàng" : "Hết hàng"}
+              {product.stock > 0 ? `Còn ${product.stock} sản phẩm` : "Hết hàng"}
             </p>
             <div className="flex flex-row gap-4 mt-5">
-              <input min={1} max={99} type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="w-1/3 border border-gray-300 px-3 rounded-xl" />
-              <button 
-              onClick={() => dispatch(addToCart({ ...product, quantity }))}
+              <input
+                min={1}
+                max={product.stock}
+                type="number"
+                value={quantity}
+                onChange={handleQuantityChange}
                 disabled={product.stock <= 0}
-                className="w-full py-3 rounded-xl text-white font-semibold bg-red-600 hover:bg-red-700 disabled:opacity-50 transition"
+                className="w-1/3 border border-gray-300 px-3 rounded-xl disabled:opacity-50"
+              />
+              <button
+                onClick={handleAddToCart}
+                disabled={product.stock <= 0 || isAdding}
+                className={`w-full py-3 rounded-xl text-white font-semibold bg-red-600 transition ${
+                  product.stock <= 0 || isAdding
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-red-700"
+                }`}
               >
-                Thêm vào giỏ hàng
+                {isAdding ? "Đang thêm..." : "Thêm vào giỏ hàng"}
               </button>
             </div>
           </div>
@@ -118,7 +153,6 @@ const ProductDetail = () => {
             </p>
           </div>
 
-          {/* Thông số kỹ thuật */}
           <div className="bg-gray-100 p-5 rounded-xl shadow-sm">
             <h2 className="text-xl font-semibold mb-3 text-gray-800">
               Thông số kỹ thuật

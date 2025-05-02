@@ -1,17 +1,100 @@
 import { ShoppingBag, Minus, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { removeItem, updateQuantity } from "../store/cartSlice";
+import { deleteItemFromCart, updateCartItemQuantity } from "../store/cartSlice";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const CartItems = ({ handleNextStep }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.items);
   const totalPrice = useSelector((state) => state.cart.totalPrice);
+  const cartStatus = useSelector((state) => state.cart.status);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const [loadingItems, setLoadingItems] = useState({});
+
+  const handleRemoveItem = async (productId) => {
+    if (loadingItems[productId]) return;
+    setLoadingItems((prev) => ({ ...prev, [productId]: true }));
+    try {
+      Swal.fire({
+        title: "Bạn có muốn xóa sản phẩm này không?",
+        text: "Sản phẩm sẽ bị xóa khỏi giỏ hàng",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        cancelButtonText: "Hủy",
+        confirmButtonText: "Đồng ý",
+      }).then(async (result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+          await dispatch(deleteItemFromCart(productId)).unwrap();
+          Swal.fire("Xóa thành công", "", "success");
+        }
+      });
+    } catch (error) {
+      console.log(error.message);
+      toast.error(
+        error.message || "Có lỗi xảy ra khi cập nhật số lượng sản phẩm!"
+      );
+    } finally {
+      setLoadingItems((prev) => ({ ...prev, [productId]: false }));
+    }
+  };
+
+  const handleUpdateQuantity = async (productId, change) => {
+    if (loadingItems[productId]) return;
+    const product = cartItems.find((item) => item._id === productId);
+    if (!product) return;
+
+    const newQuantity = product.quantity + change;
+    if (newQuantity < 1) return;
+
+    setLoadingItems((prev) => ({ ...prev, [productId]: true }));
+    try {
+      await dispatch(
+        updateCartItemQuantity({ productId, quantity: newQuantity })
+      ).unwrap();
+    } catch (error) {
+      console.log(error.message);
+      toast.error(
+        error.message || "Có lỗi xảy ra khi cập nhật số lượng sản phẩm!"
+      );
+    } finally {
+      setLoadingItems((prev) => ({ ...prev, [productId]: false }));
+    }
+  };
+
+  const handleOrder = () => {
+    if (isAuthenticated) {
+      handleNextStep();
+    } else {
+      Swal.fire({
+        title: "Vui lòng đăng nhập để đặt hàng",
+        text: "Bạn sẽ được chuyển đến trang đăng nhập",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        cancelButtonText: "Hủy",
+        confirmButtonText: "Đồng ý",
+      }).then(async (result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+          navigate("/login");
+        }
+      });
+    }
+  };
 
   return (
     <div>
-      {cartItems.length === 0 ? (
+      {cartStatus === "loading" ? (
+        <div className="text-center py-10">
+          <p className="text-xl font-medium">Đang tải giỏ hàng...</p>
+        </div>
+      ) : cartItems.length === 0 ? (
         <div className="text-center py-10">
           <ShoppingBag size={64} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-xl font-medium mb-2">Giỏ hàng trống</h3>
@@ -47,43 +130,47 @@ const CartItems = ({ handleNextStep }) => {
                     </span>
                   </div>
                   <button
-                    onClick={() => dispatch(removeItem(product._id))}
-                    className="text-gray-500 text-sm flex items-center mt-2 hover:text-red-600 cursor-pointer"
+                    onClick={() => handleRemoveItem(product._id)}
+                    disabled={loadingItems[product._id]}
+                    className={`text-gray-500 text-sm flex items-center mt-2 transition ${
+                      loadingItems[product._id]
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:text-red-600 cursor-pointer"
+                    }`}
                   >
                     <Trash2 size={16} className="mr-1" />
-                    Xóa
+                    {loadingItems[product._id] ? "Đang xóa..." : "Xóa"}
                   </button>
                 </div>
               </div>
               <div className="flex items-center ml-auto rounded-lg border overflow-hidden">
-                {/* Minus Button */}
                 <button
-                  onClick={() =>
-                    dispatch(
-                      updateQuantity({ productID: product._id, quantity: -1 })
-                    )
-                  }
-                  className="h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
+                  onClick={() => handleUpdateQuantity(product._id, -1)}
+                  disabled={loadingItems[product._id] || product.quantity <= 1}
+                  className={`h-10 w-10 flex items-center justify-center text-gray-600 transition-all ${
+                    loadingItems[product._id] || product.quantity <= 1
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-gray-100 cursor-pointer"
+                  }`}
                 >
                   <Minus size={18} />
                 </button>
 
-                {/* Quantity Input */}
                 <input
                   type="text"
                   readOnly
                   value={product.quantity}
-                  className="w-12 h-10 text-center text-base border-x focus:outline-none"
+                  className="w-12 h-10 text-center text-base border-x bg-gray-50"
                 />
 
-                {/* Plus Button */}
                 <button
-                  onClick={() =>
-                    dispatch(
-                      updateQuantity({ productID: product._id, quantity: 1 })
-                    )
-                  }
-                  className="h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
+                  onClick={() => handleUpdateQuantity(product._id, 1)}
+                  disabled={loadingItems[product._id]}
+                  className={`h-10 w-10 flex items-center justify-center text-gray-600 transition-all ${
+                    loadingItems[product._id]
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-gray-100 cursor-pointer"
+                  }`}
                 >
                   <Plus size={18} />
                 </button>
@@ -99,9 +186,8 @@ const CartItems = ({ handleNextStep }) => {
               </span>
             </div>
             <button
-              disabled
-              onClick={handleNextStep}
-              className="w-full bg-red-600 text-white py-3 rounded-md mt-4 font-medium hover:bg-red-700 cursor-pointer"
+              onClick={handleOrder}
+              className={`w-full bg-red-600 text-white py-3 rounded-md mt-4 font-medium transition hover:bg-red-700 cursor-pointer`}
             >
               ĐẶT HÀNG NGAY
             </button>

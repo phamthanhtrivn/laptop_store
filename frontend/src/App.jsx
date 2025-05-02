@@ -8,8 +8,20 @@ import ProductDetail from "./pages/ProductDetail";
 import Products from "./pages/Products";
 import Login from "./pages/Login";
 import UserDetail from "./pages/UserDetail";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { initializeAuth } from "./store/authSlice";
+import { initializeCart } from "./store/cartSlice";
 
 const App = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(initializeAuth());
+    dispatch(initializeCart());
+  }, [dispatch]);
+
+
   return (
     <div>
       <Header />
