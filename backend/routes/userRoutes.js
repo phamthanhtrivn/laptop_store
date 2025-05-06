@@ -1,5 +1,5 @@
 import express from 'express'
-import { addUser, adminLogin, checkUserPassword, deleteUser, getUser, getUserByEmail, getUserList, login, register, updateUser } from '../controllers/userControllers.js'
+import { addUser, adminLogin, checkUserPassword, deleteUser, getUser, getUserByEmail, getUserList, login, register, updateUser, verifyToken } from '../controllers/userControllers.js'
 import authUser from '../middlewares/authUser.js'
 import authAdmin from '../middlewares/authAdmin.js'
 
@@ -7,6 +7,8 @@ const userRoute = express.Router()
 
 userRoute.post('/login', login)
 userRoute.post('/register', register)
+userRoute.get('/verifyToken', authUser, verifyToken)
+
 userRoute.get('/get/:id', getUser)
 userRoute.get('/email-user', getUserByEmail)
 userRoute.delete('/delete/:id', authAdmin, deleteUser)

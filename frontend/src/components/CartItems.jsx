@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { ShoppingBag, Minus, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,9 +16,9 @@ const CartItems = ({ handleNextStep }) => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [loadingItems, setLoadingItems] = useState({});
 
-  const handleRemoveItem = async (productId) => {
-    if (loadingItems[productId]) return;
-    setLoadingItems((prev) => ({ ...prev, [productId]: true }));
+
+  const handleRemoveItem = async (productID) => {
+    if (loadingItems[productID]) return;
     try {
       Swal.fire({
         title: "Bạn có muốn xóa sản phẩm này không?",
@@ -30,7 +31,8 @@ const CartItems = ({ handleNextStep }) => {
       }).then(async (result) => {
         /* Read more about isConfirmed, isDenied below */
         if (result.isConfirmed) {
-          await dispatch(deleteItemFromCart(productId)).unwrap();
+          setLoadingItems((prev) => ({ ...prev, [productID]: true }));
+          await dispatch(deleteItemFromCart(productID)).unwrap();
           Swal.fire("Xóa thành công", "", "success");
         }
       });
@@ -40,22 +42,22 @@ const CartItems = ({ handleNextStep }) => {
         error.message || "Có lỗi xảy ra khi cập nhật số lượng sản phẩm!"
       );
     } finally {
-      setLoadingItems((prev) => ({ ...prev, [productId]: false }));
+      setLoadingItems((prev) => ({ ...prev, [productID]: false }));
     }
   };
 
-  const handleUpdateQuantity = async (productId, change) => {
-    if (loadingItems[productId]) return;
-    const product = cartItems.find((item) => item._id === productId);
+  const handleUpdateQuantity = async (productID, change) => {
+    if (loadingItems[productID]) return;
+    const product = cartItems.find((item) => item._id === productID);
     if (!product) return;
 
     const newQuantity = product.quantity + change;
     if (newQuantity < 1) return;
 
-    setLoadingItems((prev) => ({ ...prev, [productId]: true }));
+    setLoadingItems((prev) => ({ ...prev, [productID]: true }));
     try {
       await dispatch(
-        updateCartItemQuantity({ productId, quantity: newQuantity })
+        updateCartItemQuantity({ productID, quantity: newQuantity })
       ).unwrap();
     } catch (error) {
       console.log(error.message);
@@ -63,7 +65,7 @@ const CartItems = ({ handleNextStep }) => {
         error.message || "Có lỗi xảy ra khi cập nhật số lượng sản phẩm!"
       );
     } finally {
-      setLoadingItems((prev) => ({ ...prev, [productId]: false }));
+      setLoadingItems((prev) => ({ ...prev, [productID]: false }));
     }
   };
 

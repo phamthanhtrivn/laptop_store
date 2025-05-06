@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Routes, Route } from "react-router-dom";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -9,16 +10,47 @@ import Products from "./pages/Products";
 import Login from "./pages/Login";
 import UserDetail from "./pages/UserDetail";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { initializeAuth } from "./store/authSlice";
-import { initializeCart } from "./store/cartSlice";
+import { initializeCart, setCart } from "./store/cartSlice";
 
 const App = () => {
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   useEffect(() => {
-    dispatch(initializeAuth());
-    dispatch(initializeCart());
+    const initCartFromUser = async () => {
+      await dispatch(initializeCart()).unwrap();
+    }
+    initCartFromUser()
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    const storedCart = sessionStorage.getItem("cart");
+    if (storedCart) {
+      dispatch(setCart(JSON.parse(storedCart)));
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          await dispatch(initializeAuth()).unwrap();
+        }
+      } catch (error) {
+        console.error("Lỗi khi khởi tạo auth:", error);
+      }
+  
+      try {
+        await dispatch(initializeCart()).unwrap();
+      } catch (error) {
+        console.error("Lỗi khi khởi tạo cart:", error);
+      }
+    };
+  
+    fetchData();
   }, [dispatch]);
 
 

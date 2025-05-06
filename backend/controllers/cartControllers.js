@@ -91,7 +91,7 @@ export const deleteCartItem = async (req, res) => {
     }
 
     userData.cartData = userData.cartData.filter(
-      (item) => item.productID !== productID
+      (item) => item._id !== productID
     );
 
     await userData.save();

@@ -15,6 +15,8 @@ const Header = () => {
   );
   const totalQuantity = useSelector((state) => state.cart.totalQuantity);
   const [showModal, setShowModal] = useState(false);
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated)
+  const user = useSelector(state => state.auth.user)
   const modalRef = useRef();
 
   const categories = [
@@ -87,11 +89,11 @@ const Header = () => {
           </NavLink>
           <div className="flex gap-3"></div>
           <NavLink
-            to="/login"
+            to={isAuthenticated ? "/user" : "/login"}
             className="flex items-center gap-3 bg-[#BE1529] px-3 py-1.5 font-medium rounded"
           >
             <User className="text-white" size={28} />
-            <p className="hidden md:block">Đăng nhập</p>
+            <p className="hidden md:block">{isAuthenticated ? (user?.name) : "Đăng nhập"}</p>
           </NavLink>
         </div>
       </div>

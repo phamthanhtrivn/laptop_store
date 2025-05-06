@@ -7,35 +7,73 @@ const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET);
 };
 
+export const verifyToken = async (req, res) => {
+  try {
+    const { userID } = req.body;
+
+    const user = await User.findById(userID).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Người dùng không tồn tại!",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("Lỗi khi xác minh token:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
 
     if (!validator.isEmail(email)) {
-      return res.json({ success: false, message: "Email không hợp lệ!" });
+      return res.status(400).json({
+        success: false,
+        message: "Email không hợp lệ!",
+      });
     }
 
     const exist = await User.findOne({ email });
     if (exist) {
-      return res.json({
+      return res.status(400).json({
         success: false,
         message: "Tồn tại người dùng sử dụng email này!",
       });
     }
 
+    const exist2 = await User.findOne({ phone });
+    if (exist2) {
+      return res.status(400).json({
+        success: false,
+        message: "Tồn tại người dùng sử dụng số điện thoại này!",
+      });
+    }
+
     if (password.length < 8) {
-      return res.json({ success: false, message: "Mật khẩu chưa đủ mạnh!" });
+      return res.status(400).json({
+        success: false,
+        message: "Mật khẩu chưa đủ mạnh!",
+      });
     }
 
     const salt = await bcrypt.genSalt(10);
-
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = new User({
       name,
       password: hashedPassword,
       email,
-      phone: "",
+      phone,
       address: {
         city: "",
         district: "",
@@ -46,13 +84,63 @@ export const register = async (req, res) => {
       date: Date.now(),
     });
 
-    const user = await newUser.save();
+    const savedUser = await newUser.save();
+    const user = await User.findById(savedUser._id).select("-password");
 
     const token = createToken(user._id);
-    res.json({ success: true, token });
+
+    res.status(201).json({
+      success: true,
+      message: "Đăng ký thành công",
+      user,
+      token,
+    });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error("Lỗi khi đăng ký:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Người dùng không tồn tại!",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Thông tin đăng nhập không hợp lệ",
+      });
+    }
+
+    const token = createToken(user._id);
+    const userWithoutPassword = await User.findById(user._id).select(
+      "-password"
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Đăng nhập thành công",
+      token,
+      user: userWithoutPassword,
+    });
+  } catch (error) {
+    console.error("Lỗi khi đăng nhập:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -93,30 +181,6 @@ export const addUser = async (req, res) => {
     await newUser.save();
 
     res.json({ success: true, message: "Thêm người dùng thành công!" });
-  } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
-  }
-};
-
-export const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.json({ success: false, message: "Người dùng không tồn tại!" });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (isMatch) {
-      const token = createToken(user._id);
-      res.json({ success: true, token });
-    } else {
-      res.json({ success: false, message: "Thông tin đăng nhập không hợp lệ" });
-    }
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -246,7 +310,10 @@ export const getUserList = async (req, res) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    const users = await User.find({}).sort({ date: -1 }).skip(skip).limit(limit);
+    const users = await User.find({})
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit);
     const totalUsers = await User.countDocuments();
 
     res.json({
