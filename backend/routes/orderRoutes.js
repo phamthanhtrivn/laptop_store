@@ -6,8 +6,9 @@ import authAdmin from '../middlewares/authAdmin.js'
 const orderRoute = express.Router()
 
 orderRoute.get('/user', authUser, userOrders)
+orderRoute.post('/place-order', authUser, placeOrder)
+
 orderRoute.get('/all-orders', authAdmin, allOrders)
 orderRoute.post('/update-status', authAdmin, updateStatus)
-orderRoute.post('/place-order', authUser, placeOrder)
 
 export default orderRoute;

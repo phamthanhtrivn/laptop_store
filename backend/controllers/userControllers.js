@@ -7,6 +7,57 @@ const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET);
 };
 
+export const updateInfo = async (req, res) => {
+  try {
+    const { userID, name, phone, city, district, ward, street } = req.body;
+
+    if (!userID) {
+      return res.status(400).json({
+        success: false,
+        message: "Không tồn tại người dùng này!",
+      });
+    }
+
+    const updateUser = {};
+
+    if (name) updateUser.name = name;
+    if (phone) updateUser.phone = phone;
+    if (city || district || ward || street) {
+      updateUser.address = {};
+      if (city) updateUser.address.city = city;
+      if (district) updateUser.address.district = district;
+      if (ward) updateUser.address.ward = ward;
+      if (street) updateUser.address.street = street;
+    }
+    
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userID,
+      { $set: updateUser },
+      { new: true }
+    );
+    
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Không thể cập nhật thông tin người dùng này!",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Cập nhật thông tin người dùng thành công!",
+    });
+  } catch (error) {
+    console.error("Lỗi khi xác minh token:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const verifyToken = async (req, res) => {
   try {
     const { userID } = req.body;

@@ -32,11 +32,39 @@ export const placeOrder = async (req, res) => {
 
 export const userOrders = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
     const { userID } = req.body;
 
-    const orderData = await Order.find({ userID });
+    const { orderId, status } = req.query;
 
-    res.json({ success: true, orderData });
+    const query = { userID };
+
+    if (orderId && orderId !== "") {
+      query._id = orderId; 
+    }
+
+    if (status && status !== "") {
+      query.status = status;
+    }
+
+    const orderData = await Order.find(query)
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit);
+    const totalOrders = await Order.countDocuments(query);
+
+    res.json({
+      success: true,
+      orderData,
+      pagination: {
+        totalOrders,
+        totalPages: Math.ceil(totalOrders / limit),
+        currentPage: page,
+        limitPerPage: limit,
+      },
+    });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -55,7 +83,7 @@ export const allOrders = async (req, res) => {
       query["receiInfo.phone"] = phone;
     }
     if (status !== "") {
-      query.status = status
+      query.status = status;
     }
 
     const orders = await Order.find(query)

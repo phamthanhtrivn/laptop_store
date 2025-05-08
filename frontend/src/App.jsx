@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { initializeAuth } from "./store/authSlice";
 import { initializeCart, setCart } from "./store/cartSlice";
+import TermsAndPrivacy from "./pages/TermsAndPrivacy";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -69,6 +70,7 @@ const App = () => {
           <Route path="/products" element={<Products />} />
           <Route path="/login" element={<Login />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/terms" element={<TermsAndPrivacy />} />
         </Routes>
       </div>
       <Footer />

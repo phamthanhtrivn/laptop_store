@@ -2,7 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { backendUrl } from "../config/config";
-import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 // Thunk để khởi tạo trạng thái xác thực
 export const initializeAuth = createAsyncThunk(
@@ -91,6 +91,40 @@ export const logout = createAsyncThunk(
   }
 );
 
+export const updateUser = createAsyncThunk(
+  "auth/updateUser",
+  async (user, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        backendUrl + "/api/user/updateInfo",
+        {
+          name: user.name,
+          phone: user.phone,
+          city: user.city,
+          district: user.district,
+          ward: user.ward,
+          street: user.street,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (response.data.success) {
+        toast.success(response.data.message);
+        return { user: response.data.user, token: response.data.token };
+      } else {
+        toast.success(response.data.message);
+        return rejectWithValue(response.data);
+      }
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Lỗi khi cập nhật thông tin";
+      return rejectWithValue({ message });
+    }
+  }
+);
+
 const initialState = {
   user: null,
   token: null,
@@ -173,6 +207,21 @@ const authSlice = createSlice({
       .addCase(logout.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload?.message || "Lỗi khi đăng xuất";
+      })
+      // updateUser
+      .addCase(updateUser.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.status = "succeeded";
+        state.error = null;
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload?.message || "Lỗi khi cập nhật thông tin";
       });
   },
 });

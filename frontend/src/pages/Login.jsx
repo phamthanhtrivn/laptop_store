@@ -3,7 +3,7 @@ import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowRight } from "lucide-react"
 import validator from "validator"
 import { toast } from "react-toastify"
 import { useDispatch } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { login, register } from "../store/authSlice"
 import { clearCartItems } from "../store/cartSlice"
 
@@ -331,13 +331,13 @@ const Login = () => {
                 />
                 <label htmlFor="terms" className="text-sm text-gray-500">
                   Tôi đồng ý với{" "}
-                  <a href="#" className="text-blue-600 hover:underline">
+                  <Link to="/terms" className="text-blue-600 hover:underline">
                     Điều khoản dịch vụ
-                  </a>{" "}
+                  </Link>{" "}
                   và{" "}
-                  <a href="#" className="text-blue-600 hover:underline">
+                  <Link to="/terms" className="text-blue-600 hover:underline">
                     Chính sách bảo mật
-                  </a>
+                  </Link>
                 </label>
               </div>
 

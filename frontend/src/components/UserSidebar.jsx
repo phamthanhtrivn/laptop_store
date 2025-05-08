@@ -1,4 +1,5 @@
 import { User, MapPin, ShoppingBag, LogOut } from "lucide-react";
+import { memo } from "react";
 
 const UserSidebar = ({ userInfo, activeTab, setActiveTab, handleLogout }) => {
   return (
@@ -50,7 +51,7 @@ const UserSidebar = ({ userInfo, activeTab, setActiveTab, handleLogout }) => {
                 }`}
               >
                 <ShoppingBag size={18} className="mr-2" />
-                <span>Quản lý đơn hàng</span>
+                <span>Lịch sử mua hàng</span>
               </button>
             </li>
             <li>
@@ -69,4 +70,4 @@ const UserSidebar = ({ userInfo, activeTab, setActiveTab, handleLogout }) => {
   );
 };
 
-export default UserSidebar;
+export default memo(UserSidebar);

@@ -66,7 +66,7 @@ const ProductDetail = () => {
   if (!product) return null;
 
   return (
-    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] min-h-screen">
+    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] min-h-screen mb-10">
       <div className="py-9">
         <div className="flex items-center text-sm text-gray-500">
           <Link to="/" className="hover:text-blue-600">
