@@ -31,9 +31,9 @@ const Footer = () => {
         <div className="flex flex-col gap-3 text-sm">
           <p className="text-lg font-semibold text-red-600 my-2">Cách thức thanh toán</p>
           <div className="flex gap-2">
-            <img src={images.cod} alt="COD" className="w-8 h-auto transition-transform transform hover:scale-110" />
-            <img src={images.momo} alt="Momo" className="w-8 h-auto transition-transform transform hover:scale-110" />
-            <img src={images.visa} alt="Visa" className="w-8 h-auto transition-transform transform hover:scale-110" />
+            <img src={images.cod} alt="COD" className="w-12 h-auto transition-transform transform hover:scale-110" />
+            <img src={images.momo} alt="Momo" className="w-12 h-auto transition-transform transform hover:scale-110" />
+            <img src={images.vnpay} alt="VnPay" className="w-8 h-auto transition-transform transform hover:scale-110" />
           </div>
         </div>
       </div>

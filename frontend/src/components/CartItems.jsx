@@ -7,10 +7,9 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
-const CartItems = ({ handleNextStep }) => {
+const CartItems = ({ cartItems, handleNextStep }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const cartItems = useSelector((state) => state.cart.items);
   const totalPrice = useSelector((state) => state.cart.totalPrice);
   const cartStatus = useSelector((state) => state.cart.status);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);

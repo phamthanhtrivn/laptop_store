@@ -7,8 +7,9 @@ const orderSchema = new mongoose.Schema({
   receiInfo: { type: Object, required: true },  
   status: { type: String, enum: ["Chờ xác nhận", "Đóng gói", "Đang vận chuyển", "Đã giao", "Đã hủy"], default: "Chờ xác nhận" },
   date: { type: Number, required: true },
-  paymentMethod: { type: String, require: true},
-  payment: { type: Boolean, require: true}
+  paymentMethod: { type: String, enum: ["COD", "VnPay", "MoMo"], default: "COD"},
+  payment: { type: Boolean, require: true},
+  note: { type: String, default: ""}
 });
 
 const Order = mongoose.models.order || mongoose.model('order', orderSchema);

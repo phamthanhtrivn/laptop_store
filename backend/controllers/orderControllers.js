@@ -3,7 +3,8 @@ import User from "../models/User.js";
 
 export const placeOrder = async (req, res) => {
   try {
-    const { userID, items, totalPrice, receiInfo } = req.body;
+    const { userID, items, totalPrice, receiInfo, paymentMethod, note } =
+      req.body;
 
     const orderData = {
       userID,
@@ -11,19 +12,22 @@ export const placeOrder = async (req, res) => {
       receiInfo,
       totalPrice,
       date: Date.now(),
-      paymentMethod: "COD",
       payment: false,
+      note,
     };
 
-    const newOrder = new Order(orderData);
-    await newOrder.save();
+    if (paymentMethod == "COD") {
+      orderData.paymentMethod = "COD";
+      const newOrder = new Order(orderData);
+      await newOrder.save();
 
-    await User.findByIdAndUpdate(
-      userID,
-      { $set: { cartData: [] } },
-      { new: true }
-    );
-    res.json({ success: true, message: "Đơn hàng được đặt thành công!" });
+      await User.findByIdAndUpdate(
+        userID,
+        { $set: { cartData: [] } },
+        { new: true }
+      );
+      res.json({ success: true, message: "Đơn hàng được đặt thành công!" });
+    }
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -42,7 +46,7 @@ export const userOrders = async (req, res) => {
     const query = { userID };
 
     if (orderId && orderId !== "") {
-      query._id = orderId; 
+      query._id = orderId;
     }
 
     if (status && status !== "") {

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { backendUrl } from "../config/config";

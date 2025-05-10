@@ -1,170 +1,110 @@
+import { images } from "../assets/assets";
+
 const Payment = ({
-  customerInfo,
+  userInfo,
   paymentMethod,
   setPaymentMethod,
-  calculateTotal,
-  handleNextStep,
+  totalPrice,
+  selectedCity,
+  selectedDistrict,
+  selectedWard,
+  street,
+  handlePlaceOrder,
   handlePrevStep,
 }) => {
   return (
-    <div>
-      <h2 className="text-xl font-medium mb-4">Thông tin đặt hàng</h2>
-
-      <div className="mb-6">
-        <ul className="space-y-3">
+    <div className="space-y-8 bg-gray-50 p-4 sm:p-8 rounded-lg shadow-md">
+      {/* Thông tin đặt hàng */}
+      <div className="bg-white p-6 rounded-xl shadow">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Thông tin đặt hàng</h2>
+        <ul className="space-y-4 text-base text-gray-700">
           <li className="flex">
-            <span className="w-1/3 text-gray-600">• Khách hàng:</span>
-            <span className="w-2/3">{customerInfo.name || "Trí Thành"}</span>
+            <span className="w-1/3 font-medium">• Khách hàng:</span>
+            <span className="w-2/3">{userInfo.name}</span>
           </li>
           <li className="flex">
-            <span className="w-1/3 text-gray-600">• Số điện thoại:</span>
-            <span className="w-2/3">{customerInfo.phone || "0398694335"}</span>
+            <span className="w-1/3 font-medium">• Số điện thoại:</span>
+            <span className="w-2/3">{userInfo.phone}</span>
           </li>
           <li className="flex">
-            <span className="w-1/3 text-gray-600">• Địa chỉ nhận hàng:</span>
+            <span className="w-1/3 font-medium">• Địa chỉ nhận hàng:</span>
             <span className="w-2/3">
-              {customerInfo.address || "200 An Nhơn"},{" "}
-              {customerInfo.ward || "Phường 15"},{" "}
-              {customerInfo.district || "Quận Gò Vấp"},{" "}
-              {customerInfo.city || "Hồ Chí Minh"}
+              {street}, {selectedWard}, {selectedDistrict}, {selectedCity}
             </span>
           </li>
           <li className="flex">
-            <span className="w-1/3 text-gray-600">• Tạm tính:</span>
-            <span className="w-2/3 text-red-600">{calculateTotal().toLocaleString()}đ</span>
+            <span className="w-1/3 font-medium">• Tạm tính:</span>
+            <span className="w-2/3 text-red-600">{totalPrice.toLocaleString()}đ</span>
           </li>
           <li className="flex">
-            <span className="w-1/3 text-gray-600">• Phí vận chuyển:</span>
-            <span className="w-2/3">Miễn phí</span>
+            <span className="w-1/3 font-medium">• Phí vận chuyển:</span>
+            <span className="w-2/3 text-green-600 font-semibold">Miễn phí</span>
           </li>
           <li className="flex">
-            <span className="w-1/3 text-gray-600">• Tổng tiền:</span>
-            <span className="w-2/3 text-red-600 font-bold">{calculateTotal().toLocaleString()}đ</span>
+            <span className="w-1/3 font-medium">• Tổng tiền:</span>
+            <span className="w-2/3 text-xl text-red-600 font-bold">
+              {totalPrice.toLocaleString()}đ
+            </span>
           </li>
         </ul>
       </div>
 
-      <div className="mb-4">
-        <button className="flex items-center text-blue-600 hover:underline mb-6">
-          <span className="mr-1">Sử dụng mã giảm giá</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
+      {/* Chọn phương thức thanh toán */}
+      <div className="bg-white p-6 rounded-xl shadow">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Chọn hình thức thanh toán</h2>
+        <div className="space-y-4">
+          {[
+            { value: "COD", label: "Thanh toán khi giao hàng (COD)", image: images.cod },
+            { value: "MoMo", label: "Thanh toán MoMo", image: images.momo },
+            { value: "VnPay", label: "Thanh toán VNPay", image: images.vnpay },
+          ].map(({ value, label, image }) => (
+            <label
+              key={value}
+              className={`flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition ${
+                paymentMethod === value ? "border-red-500 bg-red-50" : ""
+              }`}
+            >
+              <input
+                type="radio"
+                name="paymentMethod"
+                value={value}
+                checked={paymentMethod === value}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="mr-4 accent-red-600"
+              />
+              <img src={image} alt={label} className="w-8 h-auto mr-4" />
+              <span className="text-base">{label}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
-      <h2 className="text-xl font-medium mb-4">Chọn hình thức thanh toán</h2>
-
-      <div className="space-y-4 mb-6">
-        <label className="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50">
-          <input
-            type="radio"
-            name="paymentMethod"
-            value="cod"
-            checked={paymentMethod === "cod"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            className="mr-3"
-          />
-          <div className="flex items-center">
-            <img
-              src="/placeholder.svg?height=40&width=40&text=COD"
-              alt="COD"
-              className="w-10 h-10 mr-3"
-            />
-            <span>Thanh toán khi giao hàng (COD)</span>
+      {/* Tổng kết và hành động */}
+      <div className="bg-white p-6 rounded-xl shadow">
+        <div className="border-t pt-4 space-y-3">
+          <div className="flex justify-between text-gray-600">
+            <span>Phí vận chuyển:</span>
+            <span className="font-medium text-green-600">Miễn phí</span>
           </div>
-        </label>
-
-        <label className="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50">
-          <input
-            type="radio"
-            name="paymentMethod"
-            value="momo"
-            checked={paymentMethod === "momo"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            className="mr-3"
-          />
-          <div className="flex items-center">
-            <img
-              src="/placeholder.svg?height=40&width=40&text=MOMO"
-              alt="MoMo"
-              className="w-10 h-10 mr-3"
-            />
-            <span>Thanh toán MoMo</span>
+          <div className="flex justify-between items-center text-lg">
+            <span className="font-semibold text-gray-800">Tổng tiền:</span>
+            <span className="text-2xl font-bold text-red-600">{totalPrice.toLocaleString()}đ</span>
           </div>
-        </label>
 
-        <label className="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50">
-          <input
-            type="radio"
-            name="paymentMethod"
-            value="vnpay"
-            checked={paymentMethod === "vnpay"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            className="mr-3"
-          />
-          <div className="flex items-center">
-            <img
-              src="/placeholder.svg?height=40&width=40&text=VNPAY"
-              alt="VNPay"
-              className="w-10 h-10 mr-3"
-            />
-            <span>Thanh toán VNPay</span>
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <button
+              onClick={handlePrevStep}
+              className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+            >
+              Quay lại
+            </button>
+            <button
+              onClick={handlePlaceOrder}
+              className="w-full sm:flex-1 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
+            >
+              ĐẶT HÀNG
+            </button>
           </div>
-        </label>
-
-        <label className="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50">
-          <input
-            type="radio"
-            name="paymentMethod"
-            value="bank"
-            checked={paymentMethod === "bank"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            className="mr-3"
-          />
-          <div className="flex items-center">
-            <img
-              src="/placeholder.svg?height=40&width=40&text=BANK"
-              alt="Bank Transfer"
-              className="w-10 h-10 mr-3"
-            />
-            <span>Chuyển khoản ngân hàng</span>
-          </div>
-        </label>
-      </div>
-
-      <div className="border-t pt-4">
-        <div className="flex justify-between items-center mb-2">
-          <span>Phí vận chuyển:</span>
-          <span className="font-medium">Miễn phí</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Tổng tiền:</span>
-          <span className="text-xl font-bold text-red-600">{calculateTotal().toLocaleString()}đ</span>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button
-            onClick={handlePrevStep}
-            className="px-6 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-          >
-            Quay lại
-          </button>
-          <button
-            onClick={handleNextStep}
-            className="flex-1 py-3 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 transition-colors"
-          >
-            THANH TOÁN NGAY
-          </button>
         </div>
       </div>
     </div>
