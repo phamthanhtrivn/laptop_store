@@ -1,7 +1,10 @@
 import { CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const OrderComplete = () => {
+  const order = useSelector((state) => state.order.order);
+
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 bg-gray-50">
       <div className="bg-white p-8 rounded-xl shadow-lg max-w-lg w-full text-center">
@@ -9,6 +12,10 @@ const OrderComplete = () => {
         <h2 className="text-3xl font-bold text-gray-900 mb-3">Đặt hàng thành công!</h2>
         <p className="text-gray-700 mb-2">
           Cảm ơn bạn đã lựa chọn mua sắm tại cửa hàng laptop của chúng tôi.
+        </p>
+        <p className="text-gray-700">
+          Mã đơn hàng của bạn là:{" "}
+          <span className="font-semibold text-[#e60023]">{order._id}</span>
         </p>
         <p className="text-gray-700 mb-6">Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.</p>
 

@@ -14,6 +14,7 @@ import Swal from "sweetalert2";
 import { initializeAuth, updateUser } from "../store/authSlice";
 import { placeOrder } from "../store/orderSlice";
 import OrderComplete from "../components/OrderComplete";
+import { initializeCart } from "../store/cartSlice";
 
 const Cart = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -219,7 +220,7 @@ const Cart = () => {
         /* Read more about isConfirmed, isDenied below */
         if (result.isConfirmed) {
           await dispatch(placeOrder(orderData)).unwrap();
-          await dispatch(initializeAuth()).unwrap();
+          await dispatch(initializeCart()).unwrap();
           handleNextStep();
         }
       });

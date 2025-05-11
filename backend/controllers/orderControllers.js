@@ -1,5 +1,6 @@
 import Order from "../models/Order.js";
 import User from "../models/User.js";
+import { sendMailSuccessOrder } from "../utils/sendEmail.js";
 
 export const placeOrder = async (req, res) => {
   try {
@@ -26,7 +27,13 @@ export const placeOrder = async (req, res) => {
         { $set: { cartData: [] } },
         { new: true }
       );
-      res.json({ success: true, message: "Đơn hàng được đặt thành công!" });
+      const user = await User.findById(userID);
+      await sendMailSuccessOrder(
+        user.email,
+        "Đơn hàng của bạn đã được đặt thành công!",
+        newOrder._id
+      );
+      res.json({ success: true, order: newOrder, message: "Đơn hàng được đặt thành công!" });
     }
   } catch (error) {
     console.log(error);

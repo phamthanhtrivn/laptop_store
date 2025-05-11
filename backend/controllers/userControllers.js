@@ -2,6 +2,8 @@ import User from "../models/User.js";
 import validator from "validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import ResetToken from "../models/ResetToken.js";
+import { sendMailResetPasswordToken } from "../utils/sendEmail.js";
 
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET);
@@ -29,14 +31,12 @@ export const updateInfo = async (req, res) => {
       if (ward) updateUser.address.ward = ward;
       if (street) updateUser.address.street = street;
     }
-    
 
     const updatedUser = await User.findByIdAndUpdate(
       userID,
       { $set: updateUser },
       { new: true }
     );
-    
 
     if (!updatedUser) {
       return res.status(404).json({
@@ -341,6 +341,26 @@ export const deleteUser = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
   try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "Người dùng không tồn tại!" });
+    }
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 phút
+    await ResetToken.create({ userId: user._id, token: otp, expiresAt });
+    await sendMailResetPasswordToken(
+      email,
+      "Mã xác nhận khôi phục mật khẩu",
+      `Mã OTP của bạn là: ${otp}`,
+      otp
+    );
+
+    res.json({
+      success: true,
+      message: "Mã xác nhận đã được gửi đến email của bạn!",
+    });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -349,6 +369,34 @@ export const forgotPassword = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
   try {
+    const { email, token, newPassword } = req.body;
+    const user = await User.findOne({ email });
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: "Email không tồn tại." });
+
+    const resetRecord = await ResetToken.findOne({
+      userId: user._id,
+      token,
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (!resetRecord)
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Mã OTP không hợp lệ hoặc đã hết hạn.",
+        });
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    await user.save();
+
+    await ResetToken.deleteMany({ userId: user._id });
+
+    res.json({ success: true, message: "Đặt lại mật khẩu thành công." });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
