@@ -211,7 +211,7 @@ const OrderManagement = () => {
             >
               &lt;
             </button>
-            <span className="px-4 py-2">{pagination.currentPage}</span>
+            <span className="px-4 py-2">{pagination.currentPage} / {pagination.totalPages}</span>
             <button
               onClick={() =>
                 setPagination((prev) => ({

@@ -4,6 +4,18 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import ResetToken from "../models/ResetToken.js";
 import { sendMailResetPasswordToken } from "../utils/sendEmail.js";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.CLIENT_ID);
+
+const verifyGGToken = async (token) => {
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  return payload;
+};
 
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET);
@@ -152,6 +164,56 @@ export const register = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+export const loginGG = async (req, res) => {
+  const { credential } = req.body;
+
+  if (!credential) {
+    return res.status(400).json({ message: "No credential code provided" });
+  }
+
+  try {
+    const payload = await verifyGGToken(credential);
+    const { email, name } = payload;
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash("12345678", salt);
+
+      user = new User({
+        name,
+        email,
+        password: hashedPassword,
+        phone: "",
+        address: {
+          city: "",
+          district: "",
+          ward: "",
+          street: "",
+        },
+        cartData: [],
+        date: Date.now(),
+      });
+      await user.save();
+    }
+
+    const token = createToken(user._id);
+    const userWithoutPassword = await User.findById(user._id).select(
+      "-password"
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Đăng nhập thành công",
+      token,
+      user: userWithoutPassword,
+    });
+  } catch (error) {
+    console.error("Error verifying Google token", error);
+    res.status(401).json({ message: "Invalid Google login" });
   }
 };
 
@@ -383,12 +445,10 @@ export const resetPassword = async (req, res) => {
     });
 
     if (!resetRecord)
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Mã OTP không hợp lệ hoặc đã hết hạn.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Mã OTP không hợp lệ hoặc đã hết hạn.",
+      });
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
     user.password = hashedPassword;

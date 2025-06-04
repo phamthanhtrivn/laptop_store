@@ -88,13 +88,16 @@ export const allOrders = async (req, res) => {
     const limit = 5;
     const skip = (page - 1) * limit;
 
-    const { phone, status } = req.query;
+    const { phone, status, orderID } = req.query;
     const query = {};
     if (phone) {
       query["receiInfo.phone"] = phone;
     }
     if (status !== "") {
       query.status = status;
+    }
+    if (orderID) {
+      query._id = orderID;
     }
 
     const orders = await Order.find(query)

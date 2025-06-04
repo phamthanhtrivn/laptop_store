@@ -32,6 +32,28 @@ export const initializeAuth = createAsyncThunk(
   }
 );
 
+// Thunk để đăng nhập bằng google
+export const loginWithGoogle = createAsyncThunk(
+  "auth/loginWithGoogle",
+  async (credential, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        backendUrl + "/api/user/auth/google-login",
+        {
+          credential,
+        }
+      );
+      if (response.data.success) {
+        localStorage.setItem("token", response.data.token);
+        return { user: response.data.user, token: response.data.token };
+      }
+    } catch (error) {
+      toast.error("Lỗi khi đăng nhập bằng Google");
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // Thunk để đăng nhập
 export const login = createAsyncThunk(
   "auth/login",
@@ -174,6 +196,20 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(login.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload?.message || "Lỗi khi đăng nhập";
+      })
+      .addCase(loginWithGoogle.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(loginWithGoogle.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.status = "succeeded";
+        state.error = null;
+      })
+      .addCase(loginWithGoogle.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload?.message || "Lỗi khi đăng nhập";
       })

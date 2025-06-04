@@ -15,8 +15,10 @@ const Products = () => {
   const { category } = useParams();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const selectedCategory = useSelector((state) => state.category.selectedCategory);
-  const searchQuery = useSelector((state) => state.search.searchQuery); 
+  const selectedCategory = useSelector(
+    (state) => state.category.selectedCategory
+  );
+  const searchQuery = useSelector((state) => state.search.searchQuery);
 
   const [laptops, setLaptops] = useState([]);
   const [pagination, setPagination] = useState({
@@ -25,8 +27,6 @@ const Products = () => {
     totalPages: 0,
     limitPerPage: 9,
   });
-
-  
 
   const [selectedRange, setSelectedRange] = useState(priceRanges[0]);
   const [selectedBrand, setSelectedBrand] = useState([]);
@@ -65,22 +65,19 @@ const Products = () => {
   const fetchLaptops = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        backendUrl + "/api/products/users",
-        {
-          params: {
-            page: pagination.currentPage,
-            search: searchQuery || "",
-            brand: selectedBrand.join(",") || "",
-            category: selectedCategory || undefined,
-            sort: selectedSort,
-            price: {
-              min: selectedRange.min,
-              max: selectedRange.max,
-            },
+      const response = await axios.get(backendUrl + "/api/products/users", {
+        params: {
+          page: pagination.currentPage,
+          search: searchQuery || "",
+          brand: selectedBrand.join(",") || "",
+          category: selectedCategory || undefined,
+          sort: selectedSort,
+          price: {
+            min: selectedRange.min,
+            max: selectedRange.max,
           },
-        }
-      );
+        },
+      });
       if (response.data.success) {
         setLaptops(response.data.products);
         setPagination({
@@ -272,15 +269,18 @@ const Products = () => {
                       currentPage: Math.max(prev.currentPage - 1, 1),
                     }))
                   }
-                  className={`bg-rose-600 text-white px-4 py-2 rounded-lg transition duration-300 ${
+                  disabled={pagination.currentPage === 1}
+                  className={`px-4 py-2 rounded-lg transition duration-300 ${
                     pagination.currentPage === 1
-                      ? "cursor-not-allowed"
-                      : "hover:bg-rose-700"
+                      ? "bg-gray-300 text-white cursor-not-allowed"
+                      : "bg-rose-600 text-white hover:bg-rose-700"
                   }`}
                 >
                   &lt;
                 </button>
-                <button className="px-4 py-2">{pagination.currentPage}</button>
+                <button className="px-4 py-2">
+                  {pagination.currentPage} / {pagination.totalPages}
+                </button>
                 <button
                   onClick={() =>
                     setPagination((prev) => ({
@@ -291,10 +291,11 @@ const Products = () => {
                       ),
                     }))
                   }
-                  className={`bg-rose-600 text-white px-4 py-2 rounded-lg transition duration-300 ${
+                  disabled={pagination.currentPage === pagination.totalPages}
+                  className={`px-4 py-2 rounded-lg transition duration-300 ${
                     pagination.currentPage === pagination.totalPages
-                      ? "cursor-not-allowed"
-                      : "hover:bg-rose-700"
+                      ? "bg-gray-300 text-white cursor-not-allowed"
+                      : "bg-rose-600 text-white hover:bg-rose-700"
                   }`}
                 >
                   &gt;

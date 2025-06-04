@@ -1,11 +1,12 @@
 import express from 'express'
-import { addUser, adminLogin, checkUserPassword, deleteUser, forgotPassword, getUser, getUserByEmail, getUserList, login, register, resetPassword, updateInfo, updateUser, verifyToken } from '../controllers/userControllers.js'
+import { addUser, adminLogin, checkUserPassword, deleteUser, forgotPassword, getUser, getUserByEmail, getUserList, login, loginGG, register, resetPassword, updateInfo, updateUser, verifyToken } from '../controllers/userControllers.js'
 import authUser from '../middlewares/authUser.js'
 import authAdmin from '../middlewares/authAdmin.js'
 
 const userRoute = express.Router()
 
 userRoute.post('/login', login)
+userRoute.post('/auth/google-login', loginGG)
 userRoute.post('/register', register)
 userRoute.get('/verifyToken', authUser, verifyToken)
 userRoute.post('/updateInfo', authUser, updateInfo)

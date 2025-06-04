@@ -19,7 +19,8 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [pagination, setPagination] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState("")
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const orderIdRef = useRef(null);
 
   const formatMoney = (number) => {
     return number.toLocaleString("vi-VN");
@@ -27,9 +28,9 @@ const Orders = () => {
 
   const handleSearch = async () => {
     if (page !== 1) {
-      setPage(1); 
+      setPage(1);
     } else {
-      fetchOrdersData(); 
+      fetchOrdersData();
     }
   };
 
@@ -57,33 +58,31 @@ const Orders = () => {
 
   const handleRefresh = async () => {
     searchRef.current.value = "";
-    
+    orderIdRef.current.value = "";
+
     if (selectedStatus !== "") {
       setSelectedStatus("");
     }
-  
+
     if (page !== 1) {
       setPage(1);
     } else if (selectedStatus === "") {
       fetchOrdersData();
     }
   };
-  
 
   const fetchOrdersData = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
-        backendUrl + "/api/orders/all-orders",
-        {
-          params: {
-            page,
-            phone: searchRef.current.value,
-            status: selectedStatus
-          },
-          headers: { token },
-        }
-      );
+      const response = await axios.get(backendUrl + "/api/orders/all-orders", {
+        params: {
+          page,
+          phone: searchRef.current.value.trim() || undefined,
+          status: selectedStatus,
+          orderID: orderIdRef.current.value.trim() || undefined,
+        },
+        headers: { token },
+      });
       if (response.data.success) {
         setOrders(response.data.orders);
         setPagination(response.data.pagination);
@@ -112,10 +111,19 @@ const Orders = () => {
       <h1 className="text-2xl font-semibold mb-5">Quản Lý Đơn Hàng</h1>
       <div className="flex justify-between items-start mt-8">
         <div>
-          <div className="flex gap-5 text-gray-700 items-center">
+          <div className="flex gap-5 text-gray-700 items-center mt-5">
+            <label className="text-sm">Nhập mã đơn đặt hàng:</label>
+            <input
+              type="text"
+              placeholder="ex: 6640f34f3ec8a349e82f4609"
+              ref={orderIdRef}
+              className="border border-gray-300 rounded-md px-3 py-2 w-full outline-none"
+            />
+          </div>
+          <div className="flex gap-5 text-gray-700 items-center mt-5">
             <label className="text-sm">Nhập số điện thoại cần tìm: </label>
             <input
-              type="number"
+              type="tel"
               placeholder="ex: 038964435"
               ref={searchRef}
               className="border border-gray-300 rounded-md px-3 py-2 w-full outline-none"
@@ -130,7 +138,11 @@ const Orders = () => {
           </div>
           <div className="flex gap-5 items-center text-gray-700 mt-5">
             <label className="text-sm">Trạng thái đơn hàng:</label>
-            <select onChange={(e) => setSelectedStatus(e.target.value)} value={selectedStatus} className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none">
+            <select
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              value={selectedStatus}
+              className="border border-gray-300 rounded-md px-3 py-2 w-[200px] outline-none"
+            >
               <option value="">Tất cả</option>
               <option value="Chờ xác nhận">Chờ xác nhận</option>
               <option value="Đóng gói">Đóng gói</option>

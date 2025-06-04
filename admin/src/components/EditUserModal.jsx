@@ -335,7 +335,7 @@ const EditUserModal = ({ fetchUserData, id, isOpen, onClose }) => {
         <div className="p-5 border border-gray-300 rounded mt-8">
           <div className="flex flex-col gap-3">
             <label className="font-medium">
-              Xác nhận mật khẩu để lưu thay đổi:
+              Xác nhận mật khẩu để lưu thay đổi (mật khẩu mặc định là <span className="text-red-700">"12345678"</span> nếu người dùng đăng nhập bằng Google):
             </label>
             <div className="flex items-center justify-between gap-3 border border-gray-300 rounded-md px-3 mb-4 py-2">
               <input

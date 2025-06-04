@@ -148,6 +148,42 @@ const UserDetail = () => {
         return;
       }
 
+      const updatedUser = {
+        name: userInfo.name.trim(),
+        phone: userInfo.phone.trim(),
+        city: selectedCity.trim(),
+        district: selectedDistrict.trim(),
+        ward: selectedWard.trim(),
+        street: street.trim(),
+      };
+
+      await dispatch(updateUser(updatedUser)).unwrap();
+      await dispatch(initializeAuth()).unwrap();
+    } catch (error) {
+      console.error("Lỗi khi cập nhật thông tin:", error);
+    }
+  };
+
+  const handleChangeUserInfoAddress = async () => {
+    try {
+      if (
+        !userInfo.name.match(
+          /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯàáâãèéêìíòóôõùúăđĩũơưẠ-ỹ\s]+$/
+        )
+      ) {
+        toast.error("Tên không hợp lệ!");
+        return;
+      }
+
+      if (
+        !userInfo.phone.match(
+          /^(0)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/
+        )
+      ) {
+        toast.error("Số điện thoại không hợp lệ!");
+        return;
+      }
+
       if (!selectedCity || !selectedDistrict || !selectedWard || !street) {
         toast.error("Vui lòng chọn đầy đủ địa chỉ!");
         return;
@@ -232,7 +268,7 @@ const UserDetail = () => {
                 cities={cities}
                 districts={districts}
                 wards={wards}
-                handleChangeUserInfo={handleChangeUserInfo}
+                handleChangeUserInfo={handleChangeUserInfoAddress}
               />
             )}
             {activeTab === "orders" && <OrderManagement />}
