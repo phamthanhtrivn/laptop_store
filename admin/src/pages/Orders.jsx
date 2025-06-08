@@ -104,29 +104,29 @@ const Orders = () => {
   return (
     <div className="p-5">
       {isLoading && (
-        <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60">
           <img src={images.Loading_icon} alt="loading" className="w-full" />
         </div>
       )}
-      <h1 className="text-2xl font-semibold mb-5">Quản Lý Đơn Hàng</h1>
-      <div className="flex justify-between items-start mt-8">
+      <h1 className="mb-5 text-2xl font-semibold">Quản Lý Đơn Hàng</h1>
+      <div className="flex items-start justify-between mt-8">
         <div>
-          <div className="flex gap-5 text-gray-700 items-center mt-5">
+          <div className="flex items-center gap-5 mt-5 text-gray-700">
             <label className="text-sm">Nhập mã đơn đặt hàng:</label>
             <input
               type="text"
               placeholder="ex: 6640f34f3ec8a349e82f4609"
               ref={orderIdRef}
-              className="border border-gray-300 rounded-md px-3 py-2 w-full outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md outline-none"
             />
           </div>
-          <div className="flex gap-5 text-gray-700 items-center mt-5">
+          <div className="flex items-center gap-5 mt-5 text-gray-700">
             <label className="text-sm">Nhập số điện thoại cần tìm: </label>
             <input
               type="tel"
               placeholder="ex: 038964435"
               ref={searchRef}
-              className="border border-gray-300 rounded-md px-3 py-2 w-full outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md outline-none"
             />
             <button
               onClick={handleSearch}
@@ -136,7 +136,7 @@ const Orders = () => {
               <p>Tìm kiếm</p>
             </button>
           </div>
-          <div className="flex gap-5 items-center text-gray-700 mt-5">
+          <div className="flex items-center gap-5 mt-5 text-gray-700">
             <label className="text-sm">Trạng thái đơn hàng:</label>
             <select
               onChange={(e) => setSelectedStatus(e.target.value)}
@@ -152,17 +152,17 @@ const Orders = () => {
             </select>
           </div>
         </div>
-        <div className="flex gap-5 items-center">
+        <div className="flex items-center gap-5">
           <button
             onClick={() => handleRefresh()}
-            className="hover:bg-red-500 hover:text-white duration-300 transition-all cursor-pointer bg-white border border-red-500 text-red-500 flex px-4 py-2 rounded-md gap-5 font-medium"
+            className="flex gap-5 px-4 py-2 font-medium text-red-500 transition-all duration-300 bg-white border border-red-500 rounded-md cursor-pointer hover:bg-red-500 hover:text-white"
           >
             <RefreshCcw />
             <p>Tải lại</p>
           </button>
         </div>
       </div>
-      <div className="overflow-x-auto mt-8">
+      <div className="mt-8 overflow-x-auto">
         {orders.map((order, index) => (
           <div
             key={index}
@@ -170,7 +170,7 @@ const Orders = () => {
           >
             <Package size={48} className="w-20 h-20" />
             <div>
-              <p className="mb-2 font-medium text-xl">{order.receiInfo.name}</p>
+              <p className="mb-2 text-xl font-medium">{order.receiInfo.name}</p>
               <div className="mb-2">
                 <p>{order.receiInfo.street}</p>
                 <p>
@@ -215,10 +215,10 @@ const Orders = () => {
         ))}
       </div>
       <div className="flex justify-between">
-        <div className="text-sm mt-6">
+        <div className="mt-6 text-sm">
           Tổng số đơn hàng: {pagination.totalOrders}
         </div>
-        <div className="flex justify-center items-center gap-5 mt-6">
+        <div className="flex items-center justify-center gap-5 mt-6">
           <button
             disabled={page === 1}
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}

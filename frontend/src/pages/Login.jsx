@@ -210,7 +210,7 @@ const Login = () => {
                 </div>
               </div>
 
-              <div>
+              <div className="flex justify-center mb-4">
                 <GoogleLogin
                   onSuccess={handleSuccessGGLogin}
                   onError={handleErrorGGLogin}

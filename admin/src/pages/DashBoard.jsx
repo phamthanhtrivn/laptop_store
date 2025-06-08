@@ -1,189 +1,169 @@
-import { useState } from "react";
-import { Bar, Pie } from "react-chartjs-2";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useEffect } from "react";
 import {
-  Chart as ChartJS,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-  ArcElement,
-} from "chart.js";
+  TrendingUp,
+  Package,
+  ShoppingCart,
+  Users,
+  BarChart3,
+} from "lucide-react";
+import StatsCard from "../components/StatsCard";
+import { useToken } from "../context/TokenContextProvider";
+import axios from "axios";
+import { toast } from "react-toastify";
 
-ChartJS.register(
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-  ArcElement
-);
+export default function Dashboard() {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const { backendUrl } = useToken();
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [bestSellingProduct, setBestSellingProduct] = useState(null);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [stats, setStats] = useState([
+    {
+      id: 1,
+      title: "Tổng Doanh Thu",
+      value: "0",
+      unit: "VNĐ",
+      icon: TrendingUp,
+      color: "from-emerald-500 to-teal-600",
+      bgColor: "bg-emerald-50",
+      iconColor: "text-emerald-600",
+    },
+    {
+      id: 2,
+      title: "Sản Phẩm Bán Chạy",
+      value: "Chưa có dữ liệu",
+      icon: Package,
+      color: "from-blue-500 to-cyan-600",
+      bgColor: "bg-blue-50",
+      iconColor: "text-blue-600",
+    },
+    {
+      id: 3,
+      title: "Tổng Đơn Hàng",
+      value: "0",
+      icon: ShoppingCart,
+      color: "from-purple-500 to-indigo-600",
+      bgColor: "bg-purple-50",
+      iconColor: "text-purple-600",
+    },
+    {
+      id: 4,
+      title: "Tổng Người Dùng",
+      value: "0",
+      icon: Users,
+      color: "from-orange-500 to-red-600",
+      bgColor: "bg-orange-50",
+      iconColor: "text-orange-600",
+    },
+  ]);
 
-export default function DashboardStatic() {
-  const [filter, setFilter] = useState("year");
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 86400000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const revenueLabels = {
-    year: ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6"],
-    quarter: ["Quý 1", "Quý 2", "Quý 3", "Quý 4"],
-    month: ["Tuần 1", "Tuần 2", "Tuần 3", "Tuần 4"],
-    week: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"],
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const revenueResponse = await axios.get(
+          backendUrl + "/api/orders/total-revenue"
+        );
+        if (revenueResponse.data.success) {
+          setTotalRevenue(revenueResponse.data.totalRevenue);
+        }
 
-  const revenueData = {
-    labels: revenueLabels[filter],
-    datasets: [
-      {
-        label: "Doanh thu",
-        data: [500, 800, 400, 900, 700, 1000],
-        backgroundColor: "rgba(255, 99, 132, 0.6)",
-      },
-    ],
-  };
+        const productResponse = await axios.get(
+          backendUrl + "/api/orders/best-selling"
+        );
+        if (productResponse.data.success) {
+          setBestSellingProduct(productResponse.data.product);
+        }
 
-  const bestSellerData = {
-    labels: ["Laptop", "Chuột", "Bàn phím", "Tai nghe"],
-    datasets: [
-      {
-        label: "Số lượng bán",
-        data: [50, 30, 20, 25],
-        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
-      },
-    ],
-  };
+        const ordersResponse = await axios.get(
+          backendUrl + "/api/orders/total-orders"
+        );
+        if (ordersResponse.data.success) {
+          setTotalOrders(ordersResponse.data.totalOrders);
+        }
 
-  const orderStats = {
-    labels: ["Thành công", "Thất bại"],
-    datasets: [
-      {
-        label: "Đơn hàng",
-        data: [120, 20],
-        backgroundColor: ["#4CAF50", "#F44336"],
-      },
-    ],
-  };
+        const usersResponse = await axios.get(
+          backendUrl + "/api/user/total-users"
+        );
+        if (usersResponse.data.success) {
+          setTotalUsers(usersResponse.data.totalUsers);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Lỗi khi tải dữ liệu: " + error.message);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    setStats((prevStats) =>
+      prevStats.map((stat) => {
+        if (stat.id === 1) {
+          return {
+            ...stat,
+            value: totalRevenue.toLocaleString("vi-VN") + " VNĐ",
+          };
+        } else if (stat.id === 2) {
+          return {
+            ...stat,
+            value: bestSellingProduct
+              ? bestSellingProduct.name
+              : "Chưa có dữ liệu",
+          };
+        } else if (stat.id === 3) {
+          return {
+            ...stat,
+            value: totalOrders.toLocaleString("vi-VN") + " đơn hàng",
+          };
+        } else if (stat.id === 4) {
+          return {
+            ...stat,
+            value: totalUsers.toLocaleString("vi-VN") + " người dùng",
+          };
+        }
+        return stat;
+      })
+    );
+  }, [totalRevenue, bestSellingProduct, totalOrders, totalUsers]);
 
   return (
-    <div className="p-4 space-y-6">
-      {/* Bộ lọc nâng cao */}
-      <div className="bg-white p-4 rounded shadow">
-        <h2 className="text-lg font-semibold mb-4">Bộ lọc thống kê</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="relative z-10 min-h-screen p-8 mt-5">
+      {/* Header */}
+      <div className="mb-12">
+        <div className="flex items-center justify-between">
           <div>
-            <label className="block text-sm font-medium mb-1">Năm</label>
-            <select className="border rounded px-2 py-1 w-full text-sm">
-              <option>2025</option>
-              <option>2024</option>
-            </select>
+            <h1 className="mb-2 text-4xl font-bold ">
+              Chào mừng trở lại, Admin! 👋
+            </h1>
+            <p className="text-lg text-gray-700">
+              Hôm nay là{" "}
+              {currentTime.toLocaleDateString("vi-VN", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Quý</label>
-            <select className="border rounded px-2 py-1 w-full text-sm">
-              <option disabled selected>-- Chọn nếu cần --</option>
-              <option>Q1</option>
-              <option>Q2</option>
-              <option>Q3</option>
-              <option>Q4</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Tháng</label>
-            <select className="border rounded px-2 py-1 w-full text-sm">
-              <option disabled selected>-- Chọn nếu cần --</option>
-              {[...Array(12)].map((_, i) => (
-                <option key={i}>Tháng {i + 1}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Ngày</label>
-            <select className="border rounded px-2 py-1 w-full text-sm">
-              <option disabled selected>-- Chọn nếu cần --</option>
-              {[...Array(31)].map((_, i) => (
-                <option key={i}>Ngày {i + 1}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Trạng thái đơn</label>
-            <select className="border rounded px-2 py-1 w-full text-sm">
-              <option>Tất cả</option>
-              <option>Đã giao</option>
-              <option>Đang xử lý</option>
-              <option>Đã huỷ</option>
-              <option>Chờ xác nhận</option>
-            </select>
-          </div>
+          
         </div>
       </div>
 
-      {/* Thống kê tổng quan */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow p-4">
-          <h3 className="text-sm text-gray-500">Tổng doanh thu</h3>
-          <p className="text-lg font-semibold text-red-500">120.000.000₫</p>
-        </div>
-        <div className="bg-white rounded-xl shadow p-4">
-          <h3 className="text-sm text-gray-500">Sản phẩm bán chạy nhất</h3>
-          <p className="text-lg font-semibold">Laptop Gaming</p>
-        </div>
-        <div className="bg-white rounded-xl shadow p-4">
-          <h3 className="text-sm text-gray-500">Tổng đơn hàng</h3>
-          <p className="text-lg font-semibold">140</p>
-        </div>
-        <div className="bg-white rounded-xl shadow p-4">
-          <h3 className="text-sm text-gray-500">Tỷ lệ đơn thành công</h3>
-          <p className="text-lg font-semibold text-green-600">85.7%</p>
-        </div>
-      </div>
-
-      {/* Biểu đồ pie */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl shadow p-4">
-          <h2 className="text-md font-semibold mb-2">Top sản phẩm bán chạy</h2>
-          <Pie data={bestSellerData} />
-        </div>
-
-        <div className="bg-white rounded-xl shadow p-4">
-          <h2 className="text-md font-semibold mb-2">Tỷ lệ đơn hàng</h2>
-          <Pie data={orderStats} />
-        </div>
-      </div>
-
-      {/* Biểu đồ doanh thu */}
-      <div className="bg-white rounded-xl shadow p-4">
-        <h2 className="text-md font-semibold mb-2">Biểu đồ doanh thu</h2>
-        <Bar data={revenueData} />
-      </div>
-
-      {/* Bảng doanh thu chi tiết */}
-      <div className="bg-white rounded-xl shadow p-4">
-        <h2 className="text-md font-semibold mb-4">Chi tiết doanh thu</h2>
-        <div className="overflow-auto">
-          <table className="min-w-full text-sm border">
-            <thead className="bg-gray-100 text-left">
-              <tr>
-                <th className="border px-4 py-2">Khoảng thời gian</th>
-                <th className="border px-4 py-2">Doanh thu</th>
-              </tr>
-            </thead>
-            <tbody>
-              {revenueLabels[filter].map((label, index) => (
-                <tr key={index}>
-                  <td className="border px-4 py-2">{label}</td>
-                  <td className="border px-4 py-2">
-                    {revenueData.datasets[0].data[index].toLocaleString()}₫
-                  </td>
-                </tr>
-              ))}
-              <tr>
-                <td className="border px-4 py-2 font-semibold">Tổng</td>
-                <td className="border px-4 py-2 font-semibold">
-                  {revenueData.datasets[0].data.reduce((a, b) => a + b, 0).toLocaleString()}₫
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 gap-8 mb-12 sm:grid-cols-2 mt-15">
+        {stats.map((stat, index) => (
+          <StatsCard key={index} stat={stat} />
+        ))}
       </div>
     </div>
   );

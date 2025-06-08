@@ -160,3 +160,67 @@ export const updateStatus = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+export const totalRevenue = async (req, res) => {
+  try {
+    const total = await Order.aggregate([
+      {
+        $match: { payment: true }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$totalPrice" }
+        }
+      }
+    ])
+    res.json({ success: true, totalRevenue: total[0]?.totalRevenue || 0 });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message})
+  }
+}
+
+export const totalOrders = async (req, res) => {
+  try {
+    const total = await Order.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalOrders: { $sum: 1 }
+        }
+      }
+    ])
+    res.json({ success: true, totalOrders: total[0]?.totalOrders || 0 });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message})
+  }
+}
+
+export const bestSellingProduct = async (req, res) => {
+  try {
+    const total = await Order.aggregate([
+      {
+        $unwind: "$items"
+      },
+      {
+        $group: {
+          _id: "$items.productID",
+          name: { $first: "$items.name" },
+          totalSold: { $sum: "$items.quantity" }
+        }
+      },
+      {
+        $sort: { totalSold: -1 }
+      },
+      {
+        $limit: 1
+      }
+    ])
+    res.json({ success: true, product: total[0] || null });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message})
+  }
+}

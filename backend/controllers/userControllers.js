@@ -511,3 +511,13 @@ export const adminLogin = async (req, res) => {
     console.log(error);
   }
 };
+
+export const totalUsers = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    res.json({ success: true, totalUsers });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};

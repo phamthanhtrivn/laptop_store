@@ -106,7 +106,7 @@ export const sendMailSuccessOrder = async (to, subject, orderId) => {
           }
           .email-header {
             background-color: #ff0000;
-            color: white;
+            color: #fff;
             padding: 10px 20px;
             border-radius: 8px;
             text-align: center;
