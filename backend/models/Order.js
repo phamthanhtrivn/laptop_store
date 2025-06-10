@@ -5,9 +5,9 @@ const orderSchema = new mongoose.Schema({
   items: { type: Array, required: true }, 
   totalPrice: { type: Number, required: true }, 
   receiInfo: { type: Object, required: true },  
-  status: { type: String, enum: ["Chờ xác nhận", "Đóng gói", "Đang vận chuyển", "Đã giao", "Đã hủy"], default: "Chờ xác nhận" },
+  status: { type: String, enum: ["Chờ thanh toán", "Chờ xác nhận", "Đóng gói", "Đang vận chuyển", "Đã giao", "Đã hủy"], default: "Chờ xác nhận" },
   date: { type: Number, required: true },
-  paymentMethod: { type: String, enum: ["COD", "VnPay", "MoMo"], default: "COD"},
+  paymentMethod: { type: String, enum: ["COD", "VNPay", "MoMo"], default: "COD"},
   payment: { type: Boolean, require: true},
   note: { type: String, default: ""}
 });

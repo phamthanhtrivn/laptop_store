@@ -4,7 +4,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import Header from "./components/Header";
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer } from "react-toastify";
 import ProductDetail from "./pages/ProductDetail";
 import Products from "./pages/Products";
 import Login from "./pages/Login";
@@ -15,6 +15,8 @@ import { initializeAuth } from "./store/authSlice";
 import { initializeCart, setCart } from "./store/cartSlice";
 import TermsAndPrivacy from "./pages/TermsAndPrivacy";
 import ForgotPassword from "./pages/ForgotPassword";
+import OrderComplete from "./components/OrderComplete";
+import PaymentFailed from "./components/PaymentFailed";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -23,9 +25,9 @@ const App = () => {
   useEffect(() => {
     const initCartFromUser = async () => {
       await dispatch(initializeCart()).unwrap();
-    }
-    initCartFromUser()
-  }, [isAuthenticated])
+    };
+    initCartFromUser();
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const storedCart = sessionStorage.getItem("cart");
@@ -44,17 +46,16 @@ const App = () => {
       } catch (error) {
         console.error("Lỗi khi khởi tạo auth:", error);
       }
-  
+
       try {
         await dispatch(initializeCart()).unwrap();
       } catch (error) {
         console.error("Lỗi khi khởi tạo cart:", error);
       }
     };
-  
+
     fetchData();
   }, [dispatch]);
-
 
   return (
     <div>
@@ -73,6 +74,8 @@ const App = () => {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/terms" element={<TermsAndPrivacy />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/order-complete" element={<OrderComplete />} />
+          <Route path="/payment-failed" element={<PaymentFailed />} />
         </Routes>
       </div>
       <Footer />

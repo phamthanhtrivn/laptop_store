@@ -12,9 +12,10 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { initializeAuth, updateUser } from "../store/authSlice";
-import { placeOrder } from "../store/orderSlice";
 import OrderComplete from "../components/OrderComplete";
+import { placeOrder } from "../store/orderSlice";
 import { initializeCart } from "../store/cartSlice";
+import { backendUrl } from "../config/config";
 
 const Cart = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -40,6 +41,7 @@ const Cart = () => {
     phone: "",
   });
   const [note, setNote] = useState("");
+  
 
   useEffect(() => {
     axios
@@ -193,15 +195,16 @@ const Cart = () => {
   const handlePlaceOrder = async () => {
     try {
       const orderData = {
+        userID: user._id,
         items: cartItems,
         totalPrice,
         receiInfo: {
           name: userInfo.name,
           phone: userInfo.phone,
-          city: user.address.city || selectedCity,
-          district: user.address.district || selectedDistrict,
-          ward: user.address.ward || selectedWard,
-          street: user.address.street || street,
+          city: selectedCity,
+          district: selectedDistrict,
+          ward: selectedWard,
+          street,
         },
         paymentMethod,
         note,
@@ -217,11 +220,27 @@ const Cart = () => {
         confirmButtonColor: "#d33",
         denyButtonColor: "#ccc",
       }).then(async (result) => {
-        /* Read more about isConfirmed, isDenied below */
         if (result.isConfirmed) {
-          await dispatch(placeOrder(orderData)).unwrap();
-          await dispatch(initializeCart()).unwrap();
-          handleNextStep();
+          if (paymentMethod === "VNPay") {
+            const newOrder = await dispatch(placeOrder(orderData)).unwrap();
+            const vnpayResponse = await axios.post(
+              `${backendUrl}/api/orders/vnpay/create-payment-url`,
+              {
+                amount: totalPrice,
+                bankCode: "",
+                language: "vn",
+                orderInfo: `Thanh toán đơn hàng cho ${userInfo.name}`,
+                orderId: newOrder._id,
+              },
+              { withCredentials: true }
+            );
+            
+            window.location.href = vnpayResponse.data.data;
+          } else {
+            await dispatch(placeOrder(orderData)).unwrap();
+            await dispatch(initializeCart()).unwrap();
+            handleNextStep();
+          }
         }
       });
     } catch (error) {
@@ -239,7 +258,7 @@ const Cart = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl px-4 py-8 mx-auto">
       <div className="mb-6">
         <Link
           to="/products"
@@ -287,9 +306,11 @@ const Cart = () => {
           selectedDistrict={selectedDistrict}
           selectedWard={selectedWard}
           street={street}
-          handlePlaceOrder={handlePlaceOrder}
           handleNextStep={handleNextStep}
           handlePrevStep={handlePrevStep}
+          cartItems={cartItems}
+          note={note}
+          handlePlaceOrder={handlePlaceOrder}
         />
       )}
       {activeStep === 3 && <OrderComplete />}
