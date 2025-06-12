@@ -13,7 +13,21 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 connectCloudinary();
 
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.ADMIN_URL, 
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Không được phép truy cập bởi CORS"));
+    }
+  },
+  credentials: true,
+}));
 app.use(express.json());
 
 app.use("/api/products", productRoute);

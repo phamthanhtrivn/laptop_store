@@ -236,6 +236,19 @@ const Cart = () => {
             );
             
             window.location.href = vnpayResponse.data.data;
+          } else if (paymentMethod === "MoMo") {
+            const newOrder = await dispatch(placeOrder(orderData)).unwrap();
+            const momoResponse = await axios.post(
+              `${backendUrl}/api/orders/momo/create-payment-url`,
+              {
+                amount: totalPrice,
+                orderInfo: `Thanh toán đơn hàng cho ${userInfo.name}`,
+                orderId: newOrder._id,
+              },
+              { withCredentials: true }
+            );
+
+            window.location.href = momoResponse.data.data.payUrl;
           } else {
             await dispatch(placeOrder(orderData)).unwrap();
             await dispatch(initializeCart()).unwrap();

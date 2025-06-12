@@ -1,5 +1,6 @@
 import moment from "moment";
 import qs from "qs";
+import axios from "axios";
 import crypto from "crypto";
 import vnpay from "../config/vnpay.js";
 import Order from "../models/Order.js";
@@ -49,9 +50,184 @@ export const placeOrder = async (req, res) => {
         order: newOrder,
         message: "Đơn hàng được tạo, chờ thanh toán VNPay!",
       });
+    } else if (paymentMethod === "MoMo") {
+      return res.json({
+        success: true,
+        order: newOrder,
+        message: "Đơn hàng được tạo, chờ thanh toán MoMo!",
+      });
     }
   } catch (error) {
     console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const createPaymentURLMoMo = async (req, res) => {
+  try {
+    const { amount, orderId, orderInfo } = req.body;
+
+    var partnerCode = "MOMO";
+    var accessKey = "F8BBA842ECF85";
+    var secretkey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
+    var requestId = partnerCode + new Date().getTime();
+    // var orderId = requestId;
+    // var orderInfo = "pay with MoMo";
+    var redirectUrl = process.env.RETURN_URL + "/api/orders/momo_return";
+    var ipnUrl = process.env.RETURN_URL + "/api/orders/momo_return";
+    // var ipnUrl = redirectUrl = "https://webhook.site/454e7b77-f177-4ece-8236-ddf1c26ba7f8";
+    // var amount = "50000";
+    var requestType = "captureWallet";
+    var extraData = ""; //pass empty value if your merchant does not have stores
+
+    //before sign HMAC SHA256 with format
+    //accessKey=$accessKey&amount=$amount&extraData=$extraData&ipnUrl=$ipnUrl&orderId=$orderId&orderInfo=$orderInfo&partnerCode=$partnerCode&redirectUrl=$redirectUrl&requestId=$requestId&requestType=$requestType
+    var rawSignature =
+      "accessKey=" +
+      accessKey +
+      "&amount=" +
+      amount +
+      "&extraData=" +
+      extraData +
+      "&ipnUrl=" +
+      ipnUrl +
+      "&orderId=" +
+      orderId +
+      "&orderInfo=" +
+      orderInfo +
+      "&partnerCode=" +
+      partnerCode +
+      "&redirectUrl=" +
+      redirectUrl +
+      "&requestId=" +
+      requestId +
+      "&requestType=" +
+      requestType;
+    //puts raw signature
+    // console.log("--------------------RAW SIGNATURE----------------");
+    // console.log(rawSignature);
+    //signature
+    var signature = crypto
+      .createHmac("sha256", secretkey)
+      .update(rawSignature)
+      .digest("hex");
+    // console.log("--------------------SIGNATURE----------------");
+    // console.log(signature);
+
+    //json object send to MoMo endpoint
+    const requestBody = JSON.stringify({
+      partnerCode: partnerCode,
+      accessKey: accessKey,
+      requestId: requestId,
+      amount: amount.toString(),
+      orderId: orderId,
+      orderInfo: orderInfo,
+      redirectUrl: redirectUrl,
+      ipnUrl: ipnUrl,
+      extraData: extraData,
+      requestType: requestType,
+      signature: signature,
+      lang: "en",
+    });
+
+    const response = await axios.post(
+      "https://test-payment.momo.vn/v2/gateway/api/create",
+      requestBody,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    res.json({
+      success: true,
+      data: response.data,
+      message: "Tạo URL thanh toán MoMo thành công!",
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const momoReturn = async (req, res) => {
+  try {
+    const {
+      partnerCode,
+      orderId,
+      requestId,
+      amount,
+      orderInfo,
+      orderType,
+      transId,
+      resultCode,
+      message,
+      payType,
+      responseTime,
+      extraData,
+      signature,
+    } = req.query; // MoMo uses query parameters for return URL
+    
+    // Validate required fields
+    if (!partnerCode || !orderId || !requestId || !signature) {
+      return res.json({
+        success: false,
+        message: "Thiếu các trường bắt buộc trong phản hồi MoMo!",
+      });
+    }
+
+    const secretkey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
+
+    // Create raw signature for verification
+    const rawSignature =
+      `accessKey=F8BBA842ECF85&amount=${amount}&extraData=${extraData}&message=${message}&orderId=${orderId}` +
+      `&orderInfo=${orderInfo}&orderType=${orderType}&partnerCode=${partnerCode}&payType=${payType}` +
+      `&requestId=${requestId}&responseTime=${responseTime}&resultCode=${resultCode}&transId=${transId}`;
+
+    const calculatedSignature = crypto
+      .createHmac("sha256", secretkey)
+      .update(rawSignature)
+      .digest("hex");
+
+    if (calculatedSignature !== signature) {
+      return res.json({ success: false, message: "Chữ ký không hợp lệ!" });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.json({ success: false, message: "Đơn hàng không tồn tại!" });
+    }
+
+    if (resultCode === "0") {
+      // Payment successful
+      await Order.findByIdAndUpdate(
+        orderId,
+        { payment: true, status: "Chờ xác nhận" },
+        { new: true }
+      );
+      await User.findByIdAndUpdate(
+        order.userID,
+        { $set: { cartData: [] } },
+        { new: true }
+      );
+      const user = await User.findById(order.userID);
+      await sendMailSuccessOrder(
+        user.email,
+        "Đơn hàng của bạn đã được đặt thành công!",
+        orderId
+      );
+      res.redirect(process.env.FRONTEND_URL + "/order-complete");
+    } else {
+      // Payment failed
+      await Order.findByIdAndUpdate(
+        orderId,
+        { status: "Đã hủy" },
+        { new: true }
+      );
+      res.redirect(process.env.FRONTEND_URL + "/payment-failed");
+    }
+  } catch (error) {
+    console.error("Error in momoReturn:", error);
     res.json({ success: false, message: error.message });
   }
 };
@@ -74,7 +250,7 @@ const sortObject = (obj) => {
 
 export const createPaymentURLVNPay = async (req, res) => {
   try {
-    const { amount, bankCode, language, orderInfo, orderId } = req.body
+    const { amount, bankCode, language, orderInfo, orderId } = req.body;
 
     if (!orderId) {
       return res.json({ success: false, message: "Thiếu orderId!" });
@@ -154,10 +330,6 @@ export const vnpayReturn = async (req, res) => {
 
       if (!order) {
         return res.json({ success: false, message: "Đơn hàng không tồn tại!" });
-      }
-
-      if (order.payment) {
-        return res.redirect(process.env.FRONTEND_URL + "/order-complete");
       }
 
       if (responseCode === "00") {
