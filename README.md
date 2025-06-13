@@ -38,6 +38,7 @@ mà còn là bước tiến thực tế trong việc xây dựng một ứng d�
 
 laptop_store/ <br/>
 ├── admin/       # Giao diện quản trị viên (React) <br/>
+├── assets/       # Thư mục chứa ảnh giao diện của ứng dụng <br/>
 ├── backend/     # API server (Node.js + Express) <br/>
 ├── frontend/    # Giao diện người dùng (React) <br/>
 
