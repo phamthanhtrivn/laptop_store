@@ -37,9 +37,9 @@ mà còn là bước tiến thực tế trong việc xây dựng một ứng d�
 ## 📁 Cấu trúc thư mục
 
 laptop_store/
-├── admin/ # Giao diện quản trị viên (React)
-├── backend/ # API server (Node.js + Express)
-├── frontend/ # Giao diện người dùng (React)
+├── admin/       # Giao diện quản trị viên (React)
+├── backend/     # API server (Node.js + Express)
+├── frontend/    # Giao diện người dùng (React)
 
 ---
 
@@ -59,30 +59,75 @@ laptop_store/
 
 ## 📸 Demo hình ảnh
 
-### Giao diện người dùng (User)
+### 🧑‍💻 Giao diện người dùng (User)
+
+**Trang chủ**
 ![Trang chủ](assets/user/user-home.png)
+
+**Giao diện đăng nhập người dùng**
 ![Đăng nhập](assets/user/user-login.png)
+
+**Danh sách laptop với tính năng lọc theo nhu cầu**
 ![Danh sách laptop](assets/user/user-products.png)
+
+**Chi tiết sản phẩm – mô tả, cấu hình, thêm vào giỏ hàng**
 ![Chi tiết sản phẩm](assets/user/user-product-detail.png)
+
+**Giỏ hàng – hiển thị sản phẩm đã chọn**
 ![Giỏ hàng](assets/user/user-cart.png)
+
+**Nhập thông tin giao hàng và địa chỉ**
 ![Thông tin đặt hàng](assets/user/user-order-info.png)
+
+**Chọn phương thức thanh toán: COD, MoMo hoặc VNPay**
 ![Thanh toán](assets/user/user-payment.png)
+
+**Thông báo đặt hàng thành công**
 ![Đặt hàng thành công](assets/user/user-order-complete.png)
-![Đặt hàng thất bại](assets/user/user-payment-failed.png)
+
+**Thông báo giao dịch thất bại**
+![Thanh toán thất bại](assets/user/user-payment-failed.png)
+
+**Thông tin cá nhân của người dùng**
 ![Thông tin người dùng](assets/user/user-info.png)
+
+**Danh sách địa chỉ giao hàng đã lưu**
 ![Địa chỉ của người dùng](assets/user/user-address-info.png)
+
+**Lịch sử các đơn hàng đã mua**
 ![Lịch sử các đơn hàng](assets/user/user-order-history.png)
 
-### Giao diện quản trị (Admin)
+---
+
+### 🛠️ Giao diện quản trị (Admin)
+
+**Đăng nhập dành cho quản trị viên**
 ![Đăng nhập](assets/admin/admin-login.png)
+
+**Dashboard thống kê đơn hàng, doanh thu**
 ![Dashboard thống kê](assets/admin/admin-dashboard.png)
+
+**Danh sách sản phẩm trong hệ thống**
 ![Quản lý sản phẩm](assets/admin/admin-products.png)
+
+**Form thêm sản phẩm mới**
 ![Thêm sản phẩm](assets/admin/admin-add-product.png)
+
+**Form chỉnh sửa thông tin sản phẩm**
 ![Cập nhật sản phẩm](assets/admin/admin-update-product.png)
+
+**Danh sách đơn hàng từ người dùng**
 ![Quản lý đơn hàng](assets/admin/admin-orders.png)
+
+**Quản lý người dùng trong hệ thống**
 ![Quản lý người dùng](assets/admin/admin-users.png)
+
+**Form thêm người dùng mới**
 ![Thêm người dùng](assets/admin/admin-add-user.png)
+
+**From cập nhật thông tin người dùng**
 ![Cập nhật thông tin người dùng](assets/admin/admin-update-user.png)
+
 
 ---
 
