@@ -36,10 +36,10 @@ mà còn là bước tiến thực tế trong việc xây dựng một ứng d�
 
 ## 📁 Cấu trúc thư mục
 
-laptop_store/
-├── admin/       # Giao diện quản trị viên (React)
-├── backend/     # API server (Node.js + Express)
-├── frontend/    # Giao diện người dùng (React)
+laptop_store/ <br/>
+├── admin/       # Giao diện quản trị viên (React) <br/>
+├── backend/     # API server (Node.js + Express) <br/>
+├── frontend/    # Giao diện người dùng (React) <br/>
 
 ---
 
