@@ -10,7 +10,7 @@ import { initializeCart } from "../store/cartSlice";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import UserSideBar from "../components/UserSideBar";
+import UserSidebar from "../components/UserSidebar";
 
 const UserDetail = () => {
   const dispatch = useDispatch();
@@ -239,7 +239,7 @@ const UserDetail = () => {
         </div>
       ) : (
         <div className="flex flex-col gap-6 md:flex-row">
-          <UserSideBar
+          <UserSidebar
             userInfo={userInfo}
             activeTab={activeTab}
             setActiveTab={setActiveTab}

@@ -1,5 +1,4 @@
 import { User, MapPin, ShoppingBag, LogOut } from "lucide-react";
-import { memo } from "react";
 
 const UserSidebar = ({ userInfo, activeTab, setActiveTab, handleLogout }) => {
   return (
@@ -70,4 +69,4 @@ const UserSidebar = ({ userInfo, activeTab, setActiveTab, handleLogout }) => {
   );
 };
 
-export default memo(UserSidebar);
+export default UserSidebar;
