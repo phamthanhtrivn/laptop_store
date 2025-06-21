@@ -2,7 +2,6 @@
 import { memo, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { initializeAuth, logout, updateUser } from "../store/authSlice";
-import UserSidebar from "../components/UserSideBar";
 import AccountInfo from "../components/AccountInfo";
 import AddressBook from "../components/AddressBook";
 import OrderManagement from "../components/OrderManagement";
@@ -11,6 +10,7 @@ import { initializeCart } from "../store/cartSlice";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import UserSideBar from "../components/UserSideBar";
 
 const UserDetail = () => {
   const dispatch = useDispatch();
@@ -230,7 +230,7 @@ const UserDetail = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl px-4 py-8 mx-auto">
       {isLoading ? (
         <div className="text-center">Đang tải...</div>
       ) : !user ? (
@@ -238,8 +238,8 @@ const UserDetail = () => {
           Vui lòng đăng nhập để xem thông tin
         </div>
       ) : (
-        <div className="flex flex-col md:flex-row gap-6">
-          <UserSidebar
+        <div className="flex flex-col gap-6 md:flex-row">
+          <UserSideBar
             userInfo={userInfo}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
